@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        toolbar.setTitle("Perfil");
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.getTabAt(2).setIcon(android.R.drawable.ic_dialog_alert);
         tabLayout.getTabAt(3).setIcon(android.R.drawable.ic_menu_directions);
 
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,11 +72,20 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                switch (tab.getPosition()){
-                    case 0: toolbar.setTitle("Perfil");break;
-                    case 1: toolbar.setTitle("Mapas");break;
-                    case 2: toolbar.setTitle("Feed");break;
-                    case 3: toolbar.setTitle("Chat");break;
+                mViewPager.setCurrentItem(tab.getPosition());
+                switch (tab.getPosition()) {
+                    case 0:
+                        toolbar.setTitle("Perfil");
+                        break;
+                    case 1:
+                        toolbar.setTitle("Mapas");
+                        break;
+                    case 2:
+                        toolbar.setTitle("Feed");
+                        break;
+                    case 3:
+                        toolbar.setTitle("Chat");
+                        break;
                 }
             }
 
@@ -161,9 +172,10 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+            switch(position){
+                case 3: return MapaFragment.newInstance();
+                default: return PlaceholderFragment.newInstance(position + 1);
+            }
         }
 
         @Override

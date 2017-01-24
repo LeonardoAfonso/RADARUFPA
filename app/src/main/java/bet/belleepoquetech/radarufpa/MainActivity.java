@@ -172,10 +172,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            switch(position){
-                case 3: return MapaFragment.newInstance();
-                default: return PlaceholderFragment.newInstance(position + 1);
-            }
+            return PlaceholderFragment.newInstance(position + 1);
         }
 
         @Override

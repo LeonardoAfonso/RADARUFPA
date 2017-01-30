@@ -8,10 +8,13 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.app.FragmentTransaction;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
@@ -29,7 +32,11 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
     private SupportMapFragment mapFragment;
     private Marker marker;
     private GoogleMap map;
-    private FloatingActionButton fab;
+    private FloatingActionButton fab2;
+    private FloatingActionButton fab3;
+    private FloatingActionButton fab4;
+    private Boolean isFabOpen = false;
+    private Animation fab_open,fab_close,rotate_forward,rotate_backward;
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
     public static MapaFragment newInstance() {
@@ -48,13 +55,40 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         GoogleMapOptions options = new GoogleMapOptions();
         options.zOrderOnTop(true);
         View root = inflater.inflate(R.layout.fragment_mapa, container, false);
-        fab = (FloatingActionButton) root.findViewById(R.id.fab2);
-        fab.setOnClickListener(new View.OnClickListener() {
+        fab2 = (FloatingActionButton) root.findViewById(R.id.fab2);
+        fab3 = (FloatingActionButton)root.findViewById(R.id.fab3);
+        fab4 = (FloatingActionButton)root.findViewById(R.id.fab4);
+        fab_open = AnimationUtils.loadAnimation(getContext(), R.anim.fab_open);
+        fab_close = AnimationUtils.loadAnimation(getContext(),R.anim.fab_close);
+        rotate_forward = AnimationUtils.loadAnimation(getContext(),R.anim.rotate_foward);
+        rotate_backward = AnimationUtils.loadAnimation(getContext(),R.anim.rotate_backward);
+
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateFAB();
+            }
+        });
+
+        fab3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dispatchTakePictureIntent();
             }
         });
+
+        fab4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                marker.remove();
+                fab3.startAnimation(fab_close);
+                fab4.startAnimation(fab_close);
+                //fab.startAnimation(fab_close);
+                fab2.hide();
+                isFabOpen = false;
+            }
+        });
+
         mapFragment = SupportMapFragment.newInstance(options);
         mapFragment.getMapAsync(this);
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
@@ -88,7 +122,9 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         if(marker !=null){
             marker.remove();
         }
-        fab.setVisibility(View.VISIBLE);
+        Log.i("FAB 1", String.valueOf(fab2.getVisibility()));
+        fab2.show();
+        Log.i("FAB 2", String.valueOf(fab2.getVisibility()));
         customAddMarker(new LatLng(latLng.latitude,latLng.longitude),"", "");
     }
 
@@ -112,6 +148,24 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         MarkerOptions options = new MarkerOptions();
         options.position(latlng).title(title).snippet(snippet);
         marker = map.addMarker(options);
+    }
+
+    public void animateFAB(){
+        if(isFabOpen){
+            fab2.startAnimation(rotate_backward);
+            fab3.startAnimation(fab_close);
+            fab4.startAnimation(fab_close);
+            fab3.setClickable(false);
+            fab4.setClickable(false);
+            isFabOpen = false;
+        } else {
+            fab2.startAnimation(rotate_forward);
+            fab3.startAnimation(fab_open);
+            fab4.startAnimation(fab_open);
+            fab3.setClickable(true);
+            fab4.setClickable(true);
+            isFabOpen = true;
+        }
     }
 
 

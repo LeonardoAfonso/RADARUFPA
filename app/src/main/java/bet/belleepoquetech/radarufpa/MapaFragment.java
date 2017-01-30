@@ -2,9 +2,11 @@ package bet.belleepoquetech.radarufpa;
 
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -16,8 +18,10 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.google.android.gms.ads.formats.NativeAd;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,6 +31,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MapaFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
     private SupportMapFragment mapFragment;
@@ -38,6 +47,8 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
     private Boolean isFabOpen = false;
     private Animation fab_open,fab_close,rotate_forward,rotate_backward;
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    String mCurrentPhotoPath;
+
 
     public static MapaFragment newInstance() {
         MapaFragment fragment = new MapaFragment();
@@ -140,7 +151,7 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
-            //mImageView.setImageBitmap(imageBitmap);
+            picDialog(imageBitmap);
         }
     }
 
@@ -148,6 +159,22 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         MarkerOptions options = new MarkerOptions();
         options.position(latlng).title(title).snippet(snippet);
         marker = map.addMarker(options);
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 
     public void animateFAB(){
@@ -166,6 +193,21 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
             fab4.setClickable(true);
             isFabOpen = true;
         }
+    }
+
+    public void picDialog(Bitmap imagem){
+        final Dialog view = new Dialog(getContext());
+        view.setContentView(R.layout.pic_dialog_layout);
+        ImageView img = (ImageView)view.findViewById(R.id.imageView);
+        img.setImageBitmap(imagem);
+        Button btn = (Button) view.findViewById(R.id.button3);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                view.dismiss();
+            }
+        });
+        view.show();
     }
 
 

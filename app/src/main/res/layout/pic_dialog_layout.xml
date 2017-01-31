@@ -1,59 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:weightSum="1">
+    android:orientation="vertical" android:layout_width="300dp"
+    android:layout_height="350dp"
+    android:background="@drawable/shape">
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:srcCompat="@mipmap/ic_launcher"
+        android:src="@mipmap/ic_launcher"
         android:id="@+id/imageView"
         android:layout_weight="0.28" />
 
     <TextView
-        android:text="TextView"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/textView"
-        android:layout_weight="0.05" />
+        android:text="Tipo do Problema"
+        android:id="@+id/txtTipo" />
 
-    <EditText
+    <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:text="Name"
-        android:ems="10"
-        android:id="@+id/editText"
-        android:layout_weight="0.04" />
+        android:id="@+id/pontoSpn" />
 
     <TextView
-        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Situação"
+        android:id="@+id/txtSituação" />
+
+    <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/textView2"
-        android:layout_weight="0.04" />
+        android:id="@+id/situacaoSpn" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Descrição"
+        android:id="@+id/txtDesc" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:text="Name"
-        android:ems="10"
-        android:id="@+id/editText2" />
+        android:id="@+id/edtDesc" />
 
     <Button
-        android:text="Button"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/button2"
-        android:layout_weight="0.09" />
+        android:text="Cancelar"
+        android:id="@+id/btnCancelar" />
 
     <Button
-        android:text="Button"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/button3"
-        android:layout_weight="0.06" />
+        android:text="Salvar"
+        android:id="@+id/btnSalvar" />
 </LinearLayout>

@@ -170,6 +170,8 @@ public class MainActivity extends AppCompatActivity {
             switch(position) {
                 case 1:
                     return MapaFragment.newInstance();
+                case 2:
+                    return FeedFragment.newInstance();
                 default:
                     return PlaceholderFragment.newInstance(position + 1);
             }

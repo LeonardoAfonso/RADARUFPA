@@ -90,7 +90,7 @@ public class FeedListAdapter extends BaseAdapter {
         }
 
         // Checking for null feed url
-        if (item.getUrl() != null) {
+        /*if (item.getUrl() != null) {
             url.setText(Html.fromHtml("<a href=\"" + item.getUrl() + "\">"
                     + item.getUrl() + "</a> "));
 
@@ -100,7 +100,7 @@ public class FeedListAdapter extends BaseAdapter {
         } else {
             // url is null, remove from the view
             url.setVisibility(View.GONE);
-        }
+        }*/
 
         // user profile pic
         profilePic.setImageUrl(item.getProfilePic(), imageLoader);

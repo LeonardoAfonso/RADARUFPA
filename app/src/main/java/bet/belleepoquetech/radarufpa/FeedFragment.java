@@ -133,7 +133,7 @@ public class FeedFragment extends Fragment {
                 // url might be null sometimes
                 String feedUrl = feedObj.isNull("url") ? null : feedObj
                         .getString("url");
-                item.setUrl(feedUrl);
+                //item.setUrl(feedUrl);
 
                 feedItems.add(item);
             }

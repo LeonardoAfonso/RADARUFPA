@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.view.WindowManager;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle("Perfil");
@@ -168,13 +169,16 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             switch(position) {
+                case 0:
+                    return PlaceholderFragment.newInstance(position + 1);
                 case 1:
                     return MapaFragment.newInstance();
                 case 2:
                     return FeedFragment.newInstance();
-                default:
-                    return PlaceholderFragment.newInstance(position + 1);
+                case 3:
+                    return ChatFragment.newInstance();
             }
+            return null;
         }
 
         @Override

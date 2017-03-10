@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.util.Base64;
@@ -36,7 +37,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.google.android.gms.ads.formats.NativeAd;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -103,10 +103,10 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         });
 
         fab3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dispatchTakePictureIntent();
-            }
+                @Override
+                public void onClick(View v) {
+                    dispatchTakePictureIntent();
+                }
         });
 
         fab4.setOnClickListener(new View.OnClickListener() {
@@ -167,8 +167,10 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
             File photoFile = null;
             try {
                 photoFile = createImageFile();
+                Log.i("OK","criou foto");
             } catch (IOException ex) {
                 // Error occurred while creating the File
+                Log.i("Erro","Erro ao tirar foto");
 
             }
             // Continue only if the File was successfully created

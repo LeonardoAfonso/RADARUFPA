@@ -3,6 +3,7 @@ package bet.belleepoquetech.radarufpa;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,7 @@ import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
-public class ChatFragment extends Fragment implements View.OnClickListener {
+public class ChatFragment extends Fragment implements View.OnClickListener, View.OnKeyListener {
 
     private EditText mInputMensagem;
     private Button mBtnEnviar;
@@ -51,6 +52,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
         mListaMensagens.setAdapter(mAdapter);
         mBtnEnviar.setOnClickListener(this);
+
+        mInputMensagem.setOnKeyListener(this);
 
         try {
             mSocket = IO.socket(url+":81");
@@ -99,5 +102,19 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             mSocket.emit("mensagem_servidor", mInputMensagem.getText());
             mInputMensagem.setText("");
         }
+    }
+
+    @Override
+    public boolean onKey(View v, int keyCode, KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN)
+        {
+            switch (keyCode)
+            {
+                case KeyEvent.KEYCODE_DPAD_CENTER:enviar();return true;
+                case KeyEvent.KEYCODE_ENTER:enviar();return true;
+                default:break;
+            }
+        }
+        return false;
     }
 }

@@ -4,43 +4,41 @@
     android:layout_height="match_parent"
     tools:context="bet.belleepoquetech.radarufpa.ChatFragment">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <ListView
+            android:id="@+id/lista"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="6"/>
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:id="@+id/texto"
+            android:layout_weight="1"
+            >
 
-            <ListView
-                android:id="@+id/lista"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+            <EditText
+                android:id="@+id/input_mensagem"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 />
 
-
-            <LinearLayout
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/btn_enviar"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_below="@+id/lista"
-                android:id="@+id/texto"
-                >
-
-                <EditText
-                    android:id="@+id/input_mensagem"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    />
-
-                <Button
-                    android:id="@+id/btn_enviar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="enviar"
-                    />
-
-            </LinearLayout>
+                android:text="enviar"
+                />
 
         </LinearLayout>
+
+    </LinearLayout>
 
 </FrameLayout>

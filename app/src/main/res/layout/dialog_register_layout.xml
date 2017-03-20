@@ -2,7 +2,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@drawable/shape"
+    android:padding="10dp"
+    >
 
 
     <TextView
@@ -59,7 +62,8 @@
         android:inputType="date"
         android:hint="01/01/1997"
         android:ems="10"
-        android:id="@+id/edtNasc" />
+        android:id="@+id/edtNasc"
+        />
 
     <TextView
         android:text="Curso"

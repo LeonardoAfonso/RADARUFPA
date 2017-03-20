@@ -1,7 +1,7 @@
 package bet.belleepoquetech.radarufpa;
 
 /**
- * Created by AEDI on 16/03/17.
+ * Created by AEDI on 20/03/17.
  */
 
 import com.android.volley.AuthFailureError;
@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * Created by AEDI on 19/05/16.
  */
-class CustomJSONObjectResquest extends Request<JSONObject> {
+public class CustomJSONObjectResquest extends Request<JSONObject> {
     private Response.Listener<JSONObject> response;
     private Map<String, String> params;
 

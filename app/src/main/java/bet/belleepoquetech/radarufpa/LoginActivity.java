@@ -1,5 +1,4 @@
 package bet.belleepoquetech.radarufpa;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -7,105 +6,61 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;;
 import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
-
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
+import android.widget.Toast;
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkError;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
-import com.facebook.AccessTokenTracker;
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import static android.Manifest.permission.READ_CONTACTS;
-
-/**
- * A login screen that offers login via email/password.
- */
-public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
-
-    /**
-     * Id to identity READ_CONTACTS permission request.
-     */
-    private static final int REQUEST_READ_CONTACTS = 0;
-
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
-
-    // UI references.
+public class LoginActivity extends AppCompatActivity {
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
     private Button registerBtn;
-    private LoginButton loginButton;
-    private CallbackManager callbackManager;
-    private TextView info;
+    private Button cancelBtn;
     private String name;
     private String pass;
     private String email;
-    private String birthday;
-    private String userId;
+    private String newBirthday;
+    private Date birthday;
     private String course;
-    private String prefs = "prefs";
-    private SharedPreferences sp;
-    private boolean login =false;
-    AccessTokenTracker accessTokenTracker;
-    private HashMap<String, String> params;
-    private String url = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/register";
-    private RequestQueue rq;
+    private SimpleDateFormat df;
+    private SimpleDateFormat myFormat;
+    private SharedPreferences mSharedPreferences;
+    private String urlAuthenticate = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/authenticate";
+    private String urlRegister = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/register";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,8 +68,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         setContentView(R.layout.activity_login);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        populateAutoComplete();
-
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -134,13 +87,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 attemptLogin();
             }
         });
-
+        cancelBtn = (Button)findViewById(R.id.cancelBtn);
         registerBtn = (Button)findViewById(R.id.register);
         registerBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 final Dialog registerDialog = new Dialog(LoginActivity.this);
                 registerDialog.setContentView(R.layout.dialog_register_layout);
+                registerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                DisplayMetrics metrics = getResources().getDisplayMetrics();
+                int device_TotalWidth = metrics.widthPixels;
+                int device_TotalHeight = metrics.heightPixels;
+                registerDialog.getWindow().setLayout(device_TotalWidth*80/100, device_TotalHeight*70/100);
                 Button btnRegister = (Button)registerDialog.findViewById(R.id.registerBtn);
                 btnRegister.setOnClickListener(new OnClickListener() {
                     @Override
@@ -153,29 +111,50 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         name = edtNome.getText().toString();
                         email = edtEmail.getText().toString();
                         pass = md5(edtSenha.getText().toString());
-                        birthday = edtNasc.getText().toString();
+                        myFormat = new SimpleDateFormat("dd/MM/yyyy");
+                        df = new SimpleDateFormat("yyyy-MM-dd");
+                        try {
+                            birthday = myFormat.parse(edtNasc.getText().toString());
+                            newBirthday = df.format(birthday);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                         course = edtCurso.getText().toString();
-
-                        HashMap<String,String>params = new HashMap<String, String>();
+                        HashMap<String,String>params = new HashMap<>();
                         params.put("name",name);
                         params.put("email",email);
                         params.put("password",pass);
-                        params.put("sex",course);
-                        params.put("birthdate",birthday);
-                        CustomJSONArrayRequest req = new CustomJSONArrayRequest(
+                        params.put("course",course);
+                        params.put("birthdate",newBirthday);
+                        CustomJSONObjectResquest req = new CustomJSONObjectResquest(
                                 Request.Method.POST,
-                                url,
+                                urlRegister,
                                 params,
-                                new Response.Listener<JSONArray>() {
+                                new Response.Listener<JSONObject>() {
                                     @Override
-                                    public void onResponse(JSONArray response) {
-                                        Log.i("JSONResponse","Sucesso");
+                                    public void onResponse(JSONObject response) {
+                                        Log.i("JSONResponse","Sucesso: \n "+response);
+                                        Toast.makeText(getApplicationContext(),"Login criado com sucesso!" ,Toast.LENGTH_LONG).show();
+                                        try {
+                                            Log.i("response",response.getString("response"));
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
                                     }
                                 },
                                 new Response.ErrorListener() {
                                     @Override
                                     public void onErrorResponse(VolleyError error) {
-                                        Log.i("JSONResponse","Erro "+ error.getMessage());
+                                        Log.i("JSONResponse","Erro "+ error);
+                                        if (error instanceof AuthFailureError) {
+                                            // Toast.makeText(getApplicationContext(),"AuthFailureError" ,Toast.LENGTH_LONG).show();
+                                        } else if (error instanceof ServerError) {
+                                            Toast.makeText(getApplicationContext(),"Erro no servido, tente mais tarde.." ,Toast.LENGTH_LONG).show();
+                                        } else if (error instanceof NetworkError) {
+                                            //Toast.makeText(myContext,"NetworkError" ,Toast.LENGTH_LONG).show();
+                                        } else if (error instanceof ParseError) {
+                                            //Toast.makeText(myContext,"ParseError" ,Toast.LENGTH_LONG).show();
+                                        }
                                     }
                                 }
                         );
@@ -186,13 +165,25 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                 registerDialog.setCancelable(true);
                 registerDialog.show();
+
+                cancelBtn = (Button)registerDialog.findViewById(R.id.cancelBtn);
+                cancelBtn.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        registerDialog.dismiss();
+                    }
+                });
             }
         });
-
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
-
     }
+
+    public void changeActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+    }
+
 
     private String md5(String in) {
         MessageDigest digest;
@@ -212,64 +203,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         return null;
     }
 
-    private void populateAutoComplete() {
-        if (!mayRequestContacts()) {
-            return;
-        }
-
-        getLoaderManager().initLoader(0, null, this);
-    }
-
-    private boolean mayRequestContacts() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
-        } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-        }
-        return false;
-    }
-
-    /**
-     * Callback received when a permissions request has been completed.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_READ_CONTACTS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                populateAutoComplete();
-            }
-        }
-    }
-
-
-    /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
-
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
@@ -296,31 +233,83 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            //showProgress(true);
+            HashMap<String,String>params = new HashMap<>();
+            params.put("email",email);
+            params.put("password",md5(password));
+            CustomJSONObjectResquest req = new CustomJSONObjectResquest(
+                    Request.Method.POST,
+                    urlAuthenticate,
+                    params,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            Log.i("JSONResponse","Sucesso: \n "+response);
+                            mSharedPreferences = getApplicationContext().getSharedPreferences(getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = mSharedPreferences.edit();
+                            try {
+                                Log.i("token",response.getString("token"));
+                                editor.putString("token",response.getString("token"));
+                                editor.commit();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            changeActivity();
+                        }
+
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.i("JSONResponse","Erro "+ error);
+                            if (error instanceof AuthFailureError) {
+                                mEmailView.setError("Email incorreto");
+                                mPasswordView.setError("Senha incorreta");
+                               // Toast.makeText(getApplicationContext(),"AuthFailureError" ,Toast.LENGTH_LONG).show();
+                            } else if (error instanceof ServerError) {
+                                Toast.makeText(getApplicationContext(),"Erro no servido, tente mais tarde.." ,Toast.LENGTH_LONG).show();
+                            } else if (error instanceof NetworkError) {
+                                //Toast.makeText(myContext,"NetworkError" ,Toast.LENGTH_LONG).show();
+                            } else if (error instanceof ParseError) {
+                                //Toast.makeText(myContext,"ParseError" ,Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    }
+            );
+            AppController.getInstance().addToRequestQueue(req);
         }
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
-        return email.contains("@");
+        String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
+        CharSequence inputStr = email;
+        Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(inputStr);
+        if (matcher.matches()) {
+           return true;
+        }else{
+            return false;
+        }
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() > 4;
     }
 
-    /**
-     * Shows the progress UI and hides the login form.
-     */
+    private boolean isNomevalid(){
+        return true;
+    }
+
+    private boolean isCourseEmpty(){
+        return true;
+    }
+
+    private boolean isDateValid(){
+        return true;
+    }
+
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
@@ -354,115 +343,5 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(this,
-                // Retrieve data rows for the device user's 'profile' contact.
-                Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
-                        ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
-
-                // Select only email addresses.
-                ContactsContract.Contacts.Data.MIMETYPE +
-                        " = ?", new String[]{ContactsContract.CommonDataKinds.Email
-                .CONTENT_ITEM_TYPE},
-
-                // Show primary email addresses first. Note that there won't be
-                // a primary email address if the user hasn't specified one.
-                ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        List<String> emails = new ArrayList<>();
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            emails.add(cursor.getString(ProfileQuery.ADDRESS));
-            cursor.moveToNext();
-        }
-
-        addEmailsToAutoComplete(emails);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
-    }
-
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        mEmailView.setAdapter(adapter);
-    }
-
-
-    private interface ProfileQuery {
-        String[] PROJECTION = {
-                ContactsContract.CommonDataKinds.Email.ADDRESS,
-                ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
-        };
-
-        int ADDRESS = 0;
-        int IS_PRIMARY = 1;
-    }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
 }
 

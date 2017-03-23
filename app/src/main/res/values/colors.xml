@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
-
+    <color name="colorPrimary">#571021</color>
+    <color name="colorPrimaryDark">#3D0B17</color>
+    <color name="colorAccent">#8A1934</color>
+    <color name="colorSecondary">#630611</color>
+    <color name="colorSecondaryDark">#850815</color>
 
     <!-- Feed Color Attributes -->
     <color name="white">#ffffff</color>

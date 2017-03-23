@@ -252,7 +252,7 @@ public class LoginActivity extends AppCompatActivity {
                             try {
                                 Log.i("token",response.getString("token"));
                                 editor.putString("token",response.getString("token"));
-                                editor.commit();
+                                editor.apply();
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }

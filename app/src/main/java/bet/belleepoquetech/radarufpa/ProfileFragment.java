@@ -15,8 +15,13 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,21 +45,37 @@ public class ProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
-        TextView txtNome = (TextView)rootView.findViewById(R.id.txtNome);
-        TextView txtCurso = (TextView)rootView.findViewById(R.id.txtCurso);
-        TextView txtNasc = (TextView)rootView.findViewById(R.id.txtNasc);
+        final TextView txtNome = (TextView)rootView.findViewById(R.id.txtNome);
+        final TextView txtCurso = (TextView)rootView.findViewById(R.id.txtCurso);
+        final TextView txtNasc = (TextView)rootView.findViewById(R.id.txtNasc);
 
         mSharedPreferences = getContext().getSharedPreferences(getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
         Log.i("token",mSharedPreferences.getString("token",null));
         final String token = mSharedPreferences.getString("token",null);
 
-        HashMap<String,String>params = new HashMap<>();
-        params.put("token",token);
+        Map<String,String>params = new HashMap<>();
+        //params.put("user","usurario");
 
         CustomJSONObjectResquest request = new CustomJSONObjectResquest(urlUserData+"?token="+token, params, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 Log.i("UserResponse","reponse: " + response);
+                try {
+                    txtNome.setText(response.getString("name"));
+                    txtCurso.setText(response.getString("course"));
+                    SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+                    try {
+                        Date birthday = myFormat.parse(response.getString("birthdate"));
+                        txtNasc.setText(df.format(birthday));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
             }
         }, new Response.ErrorListener() {
             @Override
@@ -69,7 +90,14 @@ public class ProfileFragment extends Fragment {
                 }
                 Log.e("Erro","Corpo \n" + body.split("</head>")[1]);
             }
-        });
+        }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError{
+                HashMap<String, String> header = new HashMap<String, String>();
+                header.put("Authorization","Bearer "+token);
+                return(header);
+            }
+        };
 
         AppController.getInstance().addToRequestQueue(request);
 

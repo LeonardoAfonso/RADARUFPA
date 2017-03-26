@@ -62,6 +62,14 @@ public class LoginActivity extends AppCompatActivity {
     private String urlAuthenticate = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/authenticate";
     private String urlRegister = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/register";
 
+    private Dialog registerDialog;
+    private Button btnRegister;
+    private  EditText edtNome;
+    private  EditText edtEmail;
+    private  EditText edtSenha;
+    private  EditText edtNasc;
+    private  EditText edtCurso;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,87 +100,7 @@ public class LoginActivity extends AppCompatActivity {
         registerBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Dialog registerDialog = new Dialog(LoginActivity.this);
-                registerDialog.setContentView(R.layout.dialog_register_layout);
-                registerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                DisplayMetrics metrics = getResources().getDisplayMetrics();
-                int device_TotalWidth = metrics.widthPixels;
-                int device_TotalHeight = metrics.heightPixels;
-                registerDialog.getWindow().setLayout(device_TotalWidth*80/100, device_TotalHeight*70/100);
-                Button btnRegister = (Button)registerDialog.findViewById(R.id.registerBtn);
-                btnRegister.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        EditText edtNome = (EditText)registerDialog.findViewById(R.id.edtNome);
-                        EditText edtEmail = (EditText)registerDialog.findViewById(R.id.edtEmail);
-                        EditText edtSenha = (EditText)registerDialog.findViewById(R.id.edtSenha);
-                        EditText edtNasc = (EditText)registerDialog.findViewById(R.id.edtNasc);
-                        EditText edtCurso= (EditText)registerDialog.findViewById(R.id.edtCurso);
-                        name = edtNome.getText().toString();
-                        email = edtEmail.getText().toString();
-                        pass = md5(edtSenha.getText().toString());
-                        myFormat = new SimpleDateFormat("dd/MM/yyyy");
-                        df = new SimpleDateFormat("yyyy-MM-dd");
-                        try {
-                            birthday = myFormat.parse(edtNasc.getText().toString());
-                            newBirthday = df.format(birthday);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        course = edtCurso.getText().toString();
-                        HashMap<String,String>params = new HashMap<>();
-                        params.put("name",name);
-                        params.put("email",email);
-                        params.put("password",pass);
-                        params.put("course",course);
-                        params.put("birthdate",newBirthday);
-                        CustomJSONObjectResquest req = new CustomJSONObjectResquest(
-                                Request.Method.POST,
-                                urlRegister,
-                                params,
-                                new Response.Listener<JSONObject>() {
-                                    @Override
-                                    public void onResponse(JSONObject response) {
-                                        Log.i("JSONResponse","Sucesso: \n "+response);
-                                        Toast.makeText(getApplicationContext(),"Login criado com sucesso!" ,Toast.LENGTH_LONG).show();
-                                        try {
-                                            Log.i("response",response.getString("response"));
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                },
-                                new Response.ErrorListener() {
-                                    @Override
-                                    public void onErrorResponse(VolleyError error) {
-                                        Log.i("JSONResponse","Erro "+ error);
-                                        if (error instanceof AuthFailureError) {
-                                            // Toast.makeText(getApplicationContext(),"AuthFailureError" ,Toast.LENGTH_LONG).show();
-                                        } else if (error instanceof ServerError) {
-                                            Toast.makeText(getApplicationContext(),"Erro no servido, tente mais tarde.." ,Toast.LENGTH_LONG).show();
-                                        } else if (error instanceof NetworkError) {
-                                            //Toast.makeText(myContext,"NetworkError" ,Toast.LENGTH_LONG).show();
-                                        } else if (error instanceof ParseError) {
-                                            //Toast.makeText(myContext,"ParseError" ,Toast.LENGTH_LONG).show();
-                                        }
-                                    }
-                                }
-                        );
-                        AppController.getInstance().addToRequestQueue(req);
-                        registerDialog.dismiss();
-                    }
-                });
-
-                registerDialog.setCancelable(true);
-                registerDialog.show();
-
-                cancelBtn = (Button)registerDialog.findViewById(R.id.cancelBtn);
-                cancelBtn.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        registerDialog.dismiss();
-                    }
-                });
+                attemptRegister();
             }
         });
         mLoginFormView = findViewById(R.id.login_form);
@@ -201,6 +129,128 @@ public class LoginActivity extends AppCompatActivity {
             return sb.toString();
         } catch (NoSuchAlgorithmException e) { e.printStackTrace(); }
         return null;
+    }
+
+    private void attemptRegister(){
+        registerDialog = new Dialog(this);
+        registerDialog.setContentView(R.layout.dialog_register_layout);
+        registerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int device_TotalWidth = metrics.widthPixels;
+        int device_TotalHeight = metrics.heightPixels;
+        registerDialog.getWindow().setLayout(device_TotalWidth*80/100, device_TotalHeight*70/100);
+        btnRegister = (Button)registerDialog.findViewById(R.id.registerBtn);
+        btnRegister.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                edtNome = (EditText)registerDialog.findViewById(R.id.edtNome);
+                edtEmail = (EditText)registerDialog.findViewById(R.id.edtEmail);
+                edtSenha = (EditText)registerDialog.findViewById(R.id.edtSenha);
+                edtNasc = (EditText)registerDialog.findViewById(R.id.edtNasc);
+                edtCurso= (EditText)registerDialog.findViewById(R.id.edtCurso);
+
+                edtNome.setError(null);
+                edtEmail.setError(null);
+                edtSenha.setError(null);
+                edtNasc.setError(null);
+
+                boolean cancel = false;
+
+
+                name = edtNome.getText().toString();
+                email = edtEmail.getText().toString();
+                pass = md5(edtSenha.getText().toString());
+                myFormat = new SimpleDateFormat("dd/MM/yyyy");
+                df = new SimpleDateFormat("yyyy-MM-dd");
+
+                try {
+                    if (TextUtils.isEmpty(edtNasc.getText().toString())) {
+                        edtNasc.setError(getString(R.string.error_field_required));
+                        cancel = true;
+                    }else{
+                        birthday = myFormat.parse(edtNasc.getText().toString());
+                        newBirthday = df.format(birthday);
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                course = edtCurso.getText().toString();
+
+                if (!TextUtils.isEmpty(pass) && !isPasswordValid(pass)) {
+                    edtSenha.setError(getString(R.string.error_invalid_password));
+                    cancel = true;
+                }
+
+                if (TextUtils.isEmpty(email)) {
+                   edtEmail.setError(getString(R.string.error_field_required));
+                    cancel = true;
+                } else if (!isEmailValid(email)) {
+                    edtEmail.setError(getString(R.string.error_invalid_email));
+                    cancel = true;
+                }else if (TextUtils.isEmpty(name)) {
+                    edtNome.setError(getString(R.string.error_field_required));
+                    cancel = true;
+                } else if (!isNameValid(name)) {
+                    edtNome.setError(getString(R.string.error_invalid_name));
+                    cancel = true;
+                }
+
+                if(!cancel){
+                    HashMap<String,String>params = new HashMap<>();
+                    params.put("name",name);
+                    params.put("email",email);
+                    params.put("password",pass);
+                    params.put("course",course);
+                    params.put("birthdate",newBirthday);
+                    CustomJSONObjectResquest req = new CustomJSONObjectResquest(
+                            Request.Method.POST,
+                            urlRegister,
+                            params,
+                            new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    Log.i("JSONResponse","Sucesso: \n "+response);
+                                    Toast.makeText(getApplicationContext(),"Login criado com sucesso!" ,Toast.LENGTH_LONG).show();
+                                    try {
+                                        Log.i("response",response.getString("response"));
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.i("JSONResponse","Erro "+ error);
+                                    if (error instanceof AuthFailureError) {
+                                        // Toast.makeText(getApplicationContext(),"AuthFailureError" ,Toast.LENGTH_LONG).show();
+                                    } else if (error instanceof ServerError) {
+                                        Toast.makeText(getApplicationContext(),"Erro no servido, tente mais tarde.." ,Toast.LENGTH_LONG).show();
+                                    } else if (error instanceof NetworkError) {
+                                        //Toast.makeText(myContext,"NetworkError" ,Toast.LENGTH_LONG).show();
+                                    } else if (error instanceof ParseError) {
+                                        //Toast.makeText(myContext,"ParseError" ,Toast.LENGTH_LONG).show();
+                                    }
+                                }
+                            }
+                    );
+
+                    AppController.getInstance().addToRequestQueue(req);
+                    registerDialog.dismiss();
+                }
+            }
+        });
+
+        cancelBtn = (Button)registerDialog.findViewById(R.id.cancelBtn);
+        cancelBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                registerDialog.dismiss();
+            }
+        });
+
+        registerDialog.setCancelable(true);
+        registerDialog.show();
     }
 
     private void attemptLogin() {
@@ -298,7 +348,7 @@ public class LoginActivity extends AppCompatActivity {
         return password.length() > 4;
     }
 
-    private boolean isNomevalid(){
+    private boolean isNameValid(String name){
         return true;
     }
 

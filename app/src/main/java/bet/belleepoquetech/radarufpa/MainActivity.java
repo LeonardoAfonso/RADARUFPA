@@ -1,11 +1,14 @@
 package bet.belleepoquetech.radarufpa;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.provider.Settings;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.multidex.MultiDex;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -185,4 +188,26 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
     }
+
+    @Override
+    public void onBackPressed(){
+        //super.onBackPressed();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Deseja mesmo sair do RadarUFPa")
+                .setPositiveButton("Não", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .setNegativeButton("Sim", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                            System.exit(0);
+                    }
+                });
+
+        builder.create().show();
+    }
+
 }

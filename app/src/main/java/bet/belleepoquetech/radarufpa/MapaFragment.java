@@ -36,6 +36,7 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -47,11 +48,14 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -63,12 +67,10 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
     private FloatingActionButton fab3;
     private FloatingActionButton fab4;
     private Boolean isFabOpen = false;
-    private Animation fab_open,fab_close,rotate_forward,rotate_backward;
+    private Animation fab_open, fab_close, rotate_forward, rotate_backward;
     static final int REQUEST_TAKE_PHOTO = 1;
     String mCurrentPhotoPath;
-    private String UPLOAD_URL ="http://simplifiedcoding.16mb.com/VolleyUpload/upload.php";
-    private String KEY_IMAGE = "image";
-    private String KEY_NAME = "name";
+    private String UPLOAD_URL = "http:////aedi.ufpa.br/~leonardo/radarufpa/index.php/api/publication";
 
 
     public static MapaFragment newInstance() {
@@ -83,17 +85,17 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-         // Inflate the layout for this fragment
+        // Inflate the layout for this fragment
         GoogleMapOptions options = new GoogleMapOptions();
         options.zOrderOnTop(true);
         View root = inflater.inflate(R.layout.fragment_mapa, container, false);
         fab2 = (FloatingActionButton) root.findViewById(R.id.fab2);
-        fab3 = (FloatingActionButton)root.findViewById(R.id.fab3);
-        fab4 = (FloatingActionButton)root.findViewById(R.id.fab4);
+        fab3 = (FloatingActionButton) root.findViewById(R.id.fab3);
+        fab4 = (FloatingActionButton) root.findViewById(R.id.fab4);
         fab_open = AnimationUtils.loadAnimation(getContext(), R.anim.fab_open);
-        fab_close = AnimationUtils.loadAnimation(getContext(),R.anim.fab_close);
-        rotate_forward = AnimationUtils.loadAnimation(getContext(),R.anim.rotate_foward);
-        rotate_backward = AnimationUtils.loadAnimation(getContext(),R.anim.rotate_backward);
+        fab_close = AnimationUtils.loadAnimation(getContext(), R.anim.fab_close);
+        rotate_forward = AnimationUtils.loadAnimation(getContext(), R.anim.rotate_foward);
+        rotate_backward = AnimationUtils.loadAnimation(getContext(), R.anim.rotate_backward);
 
         fab2.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,10 +105,10 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         });
 
         fab3.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dispatchTakePictureIntent();
-                }
+            @Override
+            public void onClick(View v) {
+                dispatchTakePictureIntent();
+            }
         });
 
         fab4.setOnClickListener(new View.OnClickListener() {
@@ -143,6 +145,7 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
             @Override
             public void onFinish() {
             }
+
             @Override
             public void onCancel() {
             }
@@ -151,13 +154,13 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
 
     @Override
     public void onMapClick(LatLng latLng) {
-        if(marker !=null){
+        if (marker != null) {
             marker.remove();
         }
         Log.i("FAB 1", String.valueOf(fab2.getVisibility()));
         fab2.show();
         Log.i("FAB 2", String.valueOf(fab2.getVisibility()));
-        customAddMarker(new LatLng(latLng.latitude,latLng.longitude),"", "");
+        customAddMarker(new LatLng(latLng.latitude, latLng.longitude), "", "");
     }
 
     private void dispatchTakePictureIntent() {
@@ -167,15 +170,15 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
             File photoFile = null;
             try {
                 photoFile = createImageFile();
-                Log.i("OK","criou foto");
+                Log.i("OK", "criou foto");
             } catch (IOException ex) {
                 // Error occurred while creating the File
-                Log.i("Erro","Erro ao tirar foto");
+                Log.i("Erro", "Erro ao tirar foto");
 
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(getContext(),"bet.belleepoquetech.radarufpa.fileprovider",photoFile);
+                Uri photoURI = FileProvider.getUriForFile(getContext(), "bet.belleepoquetech.radarufpa.fileprovider", photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
@@ -185,8 +188,8 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(resultCode != Activity.RESULT_CANCELED) {
-            if(data != null) {
+        if (resultCode != Activity.RESULT_CANCELED) {
+            if (data != null) {
                 if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
                     File file = new File(mCurrentPhotoPath);
                     picDialog(Uri.fromFile(file));
@@ -195,7 +198,7 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         }
     }
 
-    public void customAddMarker(LatLng latlng, String title, String snippet){
+    public void customAddMarker(LatLng latlng, String title, String snippet) {
         MarkerOptions options = new MarkerOptions();
         options.position(latlng).title(title).snippet(snippet);
         marker = map.addMarker(options);
@@ -224,8 +227,8 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         getActivity().sendBroadcast(mediaScanIntent);
     }
 
-    public void animateFAB(){
-        if(isFabOpen){
+    public void animateFAB() {
+        if (isFabOpen) {
             fab2.startAnimation(rotate_backward);
             fab3.startAnimation(fab_close);
             fab4.startAnimation(fab_close);
@@ -242,23 +245,18 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         }
     }
 
-    public void picDialog(Uri imagem){
+    public void picDialog(final Uri imagem) {
         final Dialog view = new Dialog(getContext());
         view.setContentView(R.layout.pic_dialog_layout);
-        ImageView img = (ImageView)view.findViewById(R.id.imageView);
+        ImageView img = (ImageView) view.findViewById(R.id.imageView);
         view.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         img.setImageURI(imagem);
         Button btn = (Button) view.findViewById(R.id.btnCancelar);
         Button btnSalvar = (Button) view.findViewById(R.id.btnSalvar);
         final Spinner pontoSpn = (Spinner) view.findViewById(R.id.pontoSpn);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),R.array.tipo_pontos_array,android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R.array.tipo_pontos_array, android.R.layout.simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         pontoSpn.setAdapter(adapter);
-
-        final Spinner situacaoSpn = (Spinner) view.findViewById(R.id.situacaoSpn);
-        ArrayAdapter <CharSequence> adapterSit = ArrayAdapter.createFromResource(getContext(),R.array.estado_pontos_array,android.R.layout.simple_spinner_dropdown_item);
-        adapterSit.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        situacaoSpn.setAdapter(adapterSit);
         final EditText edtDesc = (EditText) view.findViewById(R.id.edtDesc);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -266,20 +264,39 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
                 view.dismiss();
             }
         });
+
+        btnSalvar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    String img = getStringImage(MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imagem));
+                    uploadImage(img, edtDesc.getText().toString(), pontoSpn.getSelectedItem().toString(),marker.getPosition().toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         view.show();
     }
 
-    private void uploadImage(){
+    private void uploadImage(String imagem, String descricao, String tipo, String latLng) {
+        Map<String, String> params = new HashMap<>();
+
+        params.put("publi_pic", imagem);
+        params.put("descricao", descricao);
+        params.put("tipo", tipo);
+        params.put("latlng",latLng);
+
         //Showing the progress dialog
-        final ProgressDialog loading = ProgressDialog.show(getContext(),"Uploading...","Please wait...",false,false);
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, UPLOAD_URL,
-                new Response.Listener<String>() {
+
+        final ProgressDialog loading = ProgressDialog.show(getContext(), "Uploading...", "Please wait...", false, false);
+
+        CustomJSONObjectResquest jsonObjectRequest = new CustomJSONObjectResquest(Request.Method.POST, UPLOAD_URL, params,
+                new Response.Listener<JSONObject>() {
                     @Override
-                    public void onResponse(String s) {
-                        //Disimissing the progress dialog
-                        loading.dismiss();
-                        //Showing toast message of the response
-                        Toast.makeText(getContext(), s , Toast.LENGTH_LONG).show();
+                    public void onResponse(JSONObject response) {
+
                     }
                 },
                 new Response.ErrorListener() {
@@ -287,47 +304,19 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
                     public void onErrorResponse(VolleyError volleyError) {
                         //Dismissing the progress dialog
                         loading.dismiss();
-
                         //Showing toast
-                        Toast.makeText(getContext(), volleyError.getMessage().toString(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), new String(volleyError.networkResponse.data), Toast.LENGTH_LONG).show();
                     }
-                }){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                //Converting Bitmap to String
-                //String image = getStringImage(bitmap);
-
-                //Getting Image Name
-                //String name = editTextName.getText().toString().trim();
-
-                //Creating parameters
-                Map<String,String> params = new Hashtable<String, String>();
-
-                //Adding parameters
-                //params.put(KEY_IMAGE, image);
-                //params.put(KEY_NAME, name);
-
-                //returning parameters
-                return params;
-            }
-        };
-
-        //Creating a Request Queue
-        RequestQueueSingleton requestQueue = RequestQueueSingleton.getInstance(getContext());
-
-        //Adding request to the queue
-        requestQueue.addToRequestQueue(stringRequest);
+                });
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
     }
 
 
-
-    public String getStringImage(Bitmap bmp){
+    public String getStringImage(Bitmap bmp) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] imageBytes = baos.toByteArray();
         String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
         return encodedImage;
     }
-
-
 }

@@ -4,7 +4,9 @@ package bet.belleepoquetech.radarufpa;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -12,11 +14,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.SyncStateContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.util.Base64;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,11 +37,16 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
 import com.android.volley.Response;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -48,6 +57,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
@@ -68,9 +78,12 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
     private FloatingActionButton fab4;
     private Boolean isFabOpen = false;
     private Animation fab_open, fab_close, rotate_forward, rotate_backward;
+    private SharedPreferences mSharedPreferences;
+    private Dialog view;
     static final int REQUEST_TAKE_PHOTO = 1;
     String mCurrentPhotoPath;
-    private String UPLOAD_URL = "http:////aedi.ufpa.br/~leonardo/radarufpa/index.php/api/publication";
+    private Uri mcurrentPhotoUri;
+    private String UPLOAD_URL = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/publication";
 
 
     public static MapaFragment newInstance() {
@@ -86,6 +99,8 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        mSharedPreferences = getContext().getSharedPreferences(getResources().getString(R.string.SharedPreferences), Context.MODE_PRIVATE);
+        Log.i("Token Mapa: ",mSharedPreferences.getString("token",null));
         GoogleMapOptions options = new GoogleMapOptions();
         options.zOrderOnTop(true);
         View root = inflater.inflate(R.layout.fragment_mapa, container, false);
@@ -96,6 +111,7 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         fab_close = AnimationUtils.loadAnimation(getContext(), R.anim.fab_close);
         rotate_forward = AnimationUtils.loadAnimation(getContext(), R.anim.rotate_foward);
         rotate_backward = AnimationUtils.loadAnimation(getContext(), R.anim.rotate_backward);
+
 
         fab2.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -178,8 +194,8 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(getContext(), "bet.belleepoquetech.radarufpa.fileprovider", photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                mcurrentPhotoUri = FileProvider.getUriForFile(getContext(), "bet.belleepoquetech.radarufpa.fileprovider", photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mcurrentPhotoUri);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
 
@@ -246,8 +262,12 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
     }
 
     public void picDialog(final Uri imagem) {
-        final Dialog view = new Dialog(getContext());
+        view = new Dialog(getContext());
         view.setContentView(R.layout.pic_dialog_layout);
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int device_TotalWidth = metrics.widthPixels;
+        int device_TotalHeight = metrics.heightPixels;
+        view.getWindow().setLayout(device_TotalWidth*80/100, device_TotalHeight*70/100);
         ImageView img = (ImageView) view.findViewById(R.id.imageView);
         view.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         img.setImageURI(imagem);
@@ -268,55 +288,109 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         btnSalvar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    String img = getStringImage(MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imagem));
-                    uploadImage(img, edtDesc.getText().toString(), pontoSpn.getSelectedItem().toString(),marker.getPosition().toString());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                doPublication();
             }
         });
 
         view.show();
     }
 
-    private void uploadImage(String imagem, String descricao, String tipo, String latLng) {
-        Map<String, String> params = new HashMap<>();
+    private void doPublication() {
+        VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest(Request.Method.POST, UPLOAD_URL+"?token="+mSharedPreferences.getString("token",null), new Response.Listener<NetworkResponse>() {
+            @Override
+            public void onResponse(NetworkResponse response) {
+                String resultResponse = new String(response.data);
+                try {
+                    JSONObject result = new JSONObject(resultResponse);
+                    String status = result.getString("status");
+                    String message = result.getString("message");
 
-        params.put("publi_pic", imagem);
-        params.put("descricao", descricao);
-        params.put("tipo", tipo);
-        params.put("latlng",latLng);
-
-        //Showing the progress dialog
-
-        final ProgressDialog loading = ProgressDialog.show(getContext(), "Uploading...", "Please wait...", false, false);
-
-        CustomJSONObjectResquest jsonObjectRequest = new CustomJSONObjectResquest(Request.Method.POST, UPLOAD_URL, params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-
+                    if (status.equals(1)) {
+                        // tell everybody you have succed upload image and post strings
+                        Log.i("Messsage", message);
+                    } else {
+                        Log.i("Unexpected", message);
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        //Dismissing the progress dialog
-                        loading.dismiss();
-                        //Showing toast
-                        Toast.makeText(getContext(), new String(volleyError.networkResponse.data), Toast.LENGTH_LONG).show();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                NetworkResponse networkResponse = error.networkResponse;
+                String errorMessage = "Unknown error";
+                if (networkResponse == null) {
+                    if (error.getClass().equals(TimeoutError.class)) {
+                        errorMessage = "Request timeout";
+                    } else if (error.getClass().equals(NoConnectionError.class)) {
+                        errorMessage = "Failed to connect server";
                     }
-                });
-        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+                } else {
+                    String result = new String(networkResponse.data);
+                    Log.i("erro",result.split("</head>")[1]);
+                    /*
+                    try {
+                        JSONObject response = new JSONObject(result);
+                        String status = response.getString("status");
+                        String message = response.getString("message");
+
+                        Log.e("Error Status", status);
+                        Log.e("Error Message", message);
+
+                        if (networkResponse.statusCode == 404) {
+                            errorMessage = "Resource not found";
+                        } else if (networkResponse.statusCode == 401) {
+                            errorMessage = message+" Please login again";
+                        } else if (networkResponse.statusCode == 400) {
+                            errorMessage = message+ " Check your inputs";
+                        } else if (networkResponse.statusCode == 500) {
+                            errorMessage = message+" Something is getting wrong";
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }*/
+                }
+                Log.i("Error", errorMessage);
+                error.printStackTrace();
+            }
+        }) {
+
+            @Override
+            public Map<String,String> getHeaders(){
+                Map<String,String> headers = new HashMap<>();
+                headers.put("Authorization:","Bearer "+mSharedPreferences.getString("token",null));
+                return headers;
+            }
+
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                //params.put("token", mSharedPreferences.getString("token",null));
+                //params.put("name", mNameInput.getText().toString());
+                //params.put("location", mLocationInput.getText().toString());
+                //params.put("about", mAvatarInput.getText().toString());
+                //params.put("contact", mContactInput.getText().toString());
+                return params;
+            }
+
+            @Override
+            protected Map<String, DataPart> getByteData() {
+                Map<String, DataPart> params = new HashMap<>();
+                // file name could found file base or direct access from real path
+                // for now just get bitmap data from ImageView
+                params.put("public_pic", new DataPart("file_avatar.jpg", AppHelper.getFileDataFromUri(getContext(),mcurrentPhotoUri), "image/jpeg"));
+                //params.put("cover", new DataPart("file_cover.jpg", AppHelper.getFileDataFromDrawable(getContext(), mCoverImage.getDrawable()), "image/jpeg"));
+
+                return params;
+            }
+        };
+
+        AppController.getInstance().addToRequestQueue(multipartRequest);
+        view.dismiss();
     }
 
-
-    public String getStringImage(Bitmap bmp) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] imageBytes = baos.toByteArray();
-        String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-        return encodedImage;
-    }
 }
+
+

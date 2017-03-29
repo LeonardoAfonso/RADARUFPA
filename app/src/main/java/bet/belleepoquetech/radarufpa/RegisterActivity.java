@@ -183,11 +183,7 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                                 public void onResponse(JSONObject response) {
                                     Log.i("JSONResponse","Sucesso: \n "+response);
                                     Toast.makeText(getApplicationContext(),"Login criado com sucesso!" ,Toast.LENGTH_LONG).show();
-                                    try {
-                                        Log.i("response",response.getString("response"));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
+                                    onBackPressed();
                                 }
                             },
                             new Response.ErrorListener() {
@@ -198,7 +194,9 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                                         //Toast.makeText(getApplicationContext(),"AuthFailureError" ,Toast.LENGTH_LONG).show();
                                     } else if (error instanceof ServerError) {
                                         try {
-                                            Toast.makeText(getApplicationContext(), getJsonError(error.networkResponse.data) ,Toast.LENGTH_LONG).show();
+                                            Log.i("Erro",new String(error.networkResponse.data).split("</head>")[1]);
+                                            Toast.makeText(getApplicationContext(), getJsonError(error.networkResponse.data),Toast.LENGTH_LONG).show();
+
                                         } catch (JSONException e) {
                                             e.printStackTrace();
                                         }

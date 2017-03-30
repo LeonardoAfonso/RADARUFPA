@@ -288,14 +288,14 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         btnSalvar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                doPublication();
+                doPublication(edtDesc.getText().toString(),String.valueOf(marker.getPosition().latitude) +":"+String.valueOf(marker.getPosition().longitude));
             }
         });
 
         view.show();
     }
 
-    private void doPublication() {
+    private void doPublication(final String descricao, final String latlong) {
         VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest(Request.Method.POST, UPLOAD_URL+"?token="+mSharedPreferences.getString("token",null), new Response.Listener<NetworkResponse>() {
             @Override
             public void onResponse(NetworkResponse response) {
@@ -307,7 +307,7 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
 
                     if (status.equals(1)) {
                         // tell everybody you have succed upload image and post strings
-                        Log.i("Messsage", message);
+                        Log.i("Message", message);
                     } else {
                         Log.i("Unexpected", message);
                     }
@@ -330,27 +330,6 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
                 } else {
                     String result = new String(networkResponse.data);
                     Log.i("erro",result.split("</head>")[1]);
-                    /*
-                    try {
-                        JSONObject response = new JSONObject(result);
-                        String status = response.getString("status");
-                        String message = response.getString("message");
-
-                        Log.e("Error Status", status);
-                        Log.e("Error Message", message);
-
-                        if (networkResponse.statusCode == 404) {
-                            errorMessage = "Resource not found";
-                        } else if (networkResponse.statusCode == 401) {
-                            errorMessage = message+" Please login again";
-                        } else if (networkResponse.statusCode == 400) {
-                            errorMessage = message+ " Check your inputs";
-                        } else if (networkResponse.statusCode == 500) {
-                            errorMessage = message+" Something is getting wrong";
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }*/
                 }
                 Log.i("Error", errorMessage);
                 error.printStackTrace();
@@ -367,11 +346,8 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                //params.put("token", mSharedPreferences.getString("token",null));
-                //params.put("name", mNameInput.getText().toString());
-                //params.put("location", mLocationInput.getText().toString());
-                //params.put("about", mAvatarInput.getText().toString());
-                //params.put("contact", mContactInput.getText().toString());
+                params.put("descricao", descricao);
+                params.put("latlong", latlong);
                 return params;
             }
 

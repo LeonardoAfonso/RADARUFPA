@@ -268,8 +268,8 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         int device_TotalWidth = metrics.widthPixels;
         int device_TotalHeight = metrics.heightPixels;
         view.getWindow().setLayout(device_TotalWidth*80/100, device_TotalHeight*70/100);
-        ImageView img = (ImageView) view.findViewById(R.id.imageView);
         view.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        ImageView img = (ImageView) view.findViewById(R.id.imageView);
         img.setImageURI(imagem);
         Button btn = (Button) view.findViewById(R.id.btnCancelar);
         Button btnSalvar = (Button) view.findViewById(R.id.btnSalvar);

@@ -86,14 +86,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <android.support.design.widget.TextInputEditText
-                    android:id="@+id/curso"
+                <android.support.v7.widget.AppCompatSpinner
+                    android:id="@+id/spinner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/prompt_curso"
-                    android:inputType="text"
+                    android:hint="@string/prompt_tipo"
                     android:maxLines="1"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    >
+
+
+                </android.support.v7.widget.AppCompatSpinner>
 
             </android.support.design.widget.TextInputLayout>
 

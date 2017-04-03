@@ -5,6 +5,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +33,11 @@ public class FeedFragment extends Fragment {
     private ListView listView;
     private FeedListAdapter listAdapter;
     private List<FeedItem> feedItems;
-    private String URL_FEED = "http://api.androidhive.info/feed/feed.json";
+    private Cache cache;
+    private Cache.Entry entry;
+    //private String URL_FEED = "http://api.androidhive.info/feed/feed.json";
+    private String URL_FEED = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/feed";
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     public FeedFragment() {
         // Required empty public constructor
@@ -56,20 +62,37 @@ public class FeedFragment extends Fragment {
 
         listView = (ListView) rootView.findViewById(R.id.list);
 
-        feedItems = new ArrayList<FeedItem>();
+        feedItems = new ArrayList<>();
 
         listAdapter = new FeedListAdapter(getActivity(), feedItems);
         listView.setAdapter(listAdapter);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe);
+
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getFeed();
+            }
+        });
+
+
 
         // These two lines not needed,
         // just to get the look of facebook (changing background color & hiding the icon)
         //getActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#3b5998")));
         //getActionBar().setIcon(
-        new ColorDrawable(ContextCompat.getColor(getContext(),android.R.color.transparent));
 
+        new ColorDrawable(ContextCompat.getColor(getContext(),android.R.color.transparent));
+        getFeed();
+        return rootView;
+    }
+
+    private void getFeed(){
         // We first check for cached request
-        Cache cache = AppController.getInstance().getRequestQueue().getCache();
-        Cache.Entry entry = cache.get(URL_FEED);
+        cache = AppController.getInstance().getRequestQueue().getCache();
+        entry = cache.get(URL_FEED);
         if (entry != null) {
             // fetch the data from cache
             try {
@@ -90,7 +113,7 @@ public class FeedFragment extends Fragment {
 
                 @Override
                 public void onResponse(JSONObject response) {
-                    VolleyLog.d(TAG, "Response: " + response.toString());
+                    Log.i(TAG, "Response: " + response);
                     if (response != null) {
                         parseJsonFeed(response);
                     }
@@ -99,20 +122,20 @@ public class FeedFragment extends Fragment {
 
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    VolleyLog.d(TAG, "Error: " + error.getMessage());
+                   Log.i(TAG, "Error: " + new String(error.networkResponse.data));
                 }
             });
 
             // Adding request to volley request queue
             AppController.getInstance().addToRequestQueue(jsonReq);
         }
-
-
-        return rootView;
+        swipeRefreshLayout.setRefreshing(false);
     }
+
 
     private void parseJsonFeed(JSONObject response) {
         try {
+            listAdapter.clearData();
             JSONArray feedArray = response.getJSONArray("feed");
 
             for (int i = 0; i < feedArray.length(); i++) {
@@ -120,20 +143,26 @@ public class FeedFragment extends Fragment {
 
                 FeedItem item = new FeedItem();
                 item.setId(feedObj.getInt("id"));
-                item.setName(feedObj.getString("name"));
+                JSONObject user = feedObj.getJSONObject("user");
+
+                item.setName(user.getString("name"));
 
                 // Image might be null sometimes
-                String image = feedObj.isNull("image") ? null : feedObj
-                        .getString("image");
+                JSONObject picture = feedObj.getJSONObject("picture");
+
+                String image = picture.isNull("url") ? null : picture.getString("url");
+                item.setImge("http://aedi.ufpa.br/~leonardo/radarufpa/storage/app/"+image);
+                item.setStatus(feedObj.getString("descricao"));
+                item.setProfilePic("http://api.androidhive.info/feed/img/nat.jpg");
+                item.setTimeStamp(feedObj.getString("created_at"));
+
+                /*
+                String image = feedObj.isNull("image") ? null : feedObj.getString("image");
                 item.setImge(image);
                 item.setStatus(feedObj.getString("status"));
                 item.setProfilePic(feedObj.getString("profilePic"));
                 item.setTimeStamp(feedObj.getString("timeStamp"));
-
-                // url might be null sometimes
-                String feedUrl = feedObj.isNull("url") ? null : feedObj
-                        .getString("url");
-                //item.setUrl(feedUrl);
+                */
 
                 feedItems.add(item);
             }

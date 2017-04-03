@@ -20,7 +20,6 @@ public class FeedItem {
         this.status = status;
         this.profilePic = profilePic;
         this.timeStamp = timeStamp;
-        //this.url = url;
     }
 
     public int getId() {
@@ -71,11 +70,4 @@ public class FeedItem {
         this.timeStamp = timeStamp;
     }
 
-    /*public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }*/
 }

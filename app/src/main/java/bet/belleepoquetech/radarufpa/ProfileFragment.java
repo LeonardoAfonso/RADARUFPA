@@ -3,12 +3,15 @@ package bet.belleepoquetech.radarufpa;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
@@ -45,8 +48,13 @@ public class ProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
+        ImageView circleView  = (ImageView)rootView.findViewById(R.id.circleView);
+        Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(),R.drawable.teste);
+        Bitmap circularBitmap = ImageConverter.getRoundedCornerBitmap(bitmap, 400);
+        circleView.setImageBitmap(circularBitmap);
+
         final TextView txtNome = (TextView)rootView.findViewById(R.id.txtNome);
-        final TextView txtCurso = (TextView)rootView.findViewById(R.id.txtCurso);
+        final TextView txtTipo = (TextView)rootView.findViewById(R.id.txtCurso);
         final TextView txtNasc = (TextView)rootView.findViewById(R.id.txtNasc);
 
         mSharedPreferences = getContext().getSharedPreferences(getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
@@ -62,7 +70,7 @@ public class ProfileFragment extends Fragment {
                 Log.i("UserResponse","reponse: " + response);
                 try {
                     txtNome.setText(response.getString("name"));
-                    txtCurso.setText(response.getString("course"));
+                    txtTipo.setText(response.getString("type"));
                     SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd");
                     SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
                     try {

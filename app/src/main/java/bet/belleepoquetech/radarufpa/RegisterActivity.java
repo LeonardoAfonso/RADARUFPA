@@ -11,10 +11,12 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -45,14 +47,14 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
     private  EditText edtEmail;
     private  EditText edtSenha;
     private  EditText edtNasc;
-    private  EditText edtCurso;
+    private Spinner spinner;
     private Button cancelBtn;
     private String name;
     private String pass;
     private String email;
     private String newBirthday;
     private Date birthday;
-    private String course;
+    private String spn;
     private SimpleDateFormat df;
     private SimpleDateFormat myFormat;
     private String urlRegister = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/register";
@@ -65,9 +67,13 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
         edtEmail = (EditText)findViewById(R.id.email);
         edtSenha = (EditText)findViewById(R.id.password);
         edtNasc = (EditText)findViewById(R.id.birth);
-        edtCurso= (EditText)findViewById(R.id.curso);
+        spinner = (Spinner) findViewById(R.id.spinner);
         btnRegister = (Button)findViewById(R.id.registerBtn);
         cancelBtn = (Button)findViewById(R.id.cancelBtn);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.tipo_usuario_array, android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
 
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,7 +149,7 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                course = edtCurso.getText().toString();
+                spn = spinner.getSelectedItem().toString();
 
                 if (!TextUtils.isEmpty(pass) && !isPasswordValid(pass)) {
                     edtSenha.setError(getString(R.string.error_invalid_password));
@@ -162,9 +168,6 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                 } else if (!isNameValid(name)) {
                     edtNome.setError(getString(R.string.error_invalid_name));
                     cancel = true;
-                }else if(isCourseEmpty()){
-                    edtCurso.setError(getString(R.string.error_field_required));
-                    cancel = true;
                 }
 
                 if(!cancel){
@@ -172,7 +175,7 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                     params.put("name",name);
                     params.put("email",email);
                     params.put("password",pass);
-                    params.put("course",course);
+                    params.put("type",spn);
                     params.put("birthdate",newBirthday);
                     CustomJSONObjectResquest req = new CustomJSONObjectResquest(
                             Request.Method.POST,
@@ -250,10 +253,6 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
 
     private boolean isNameValid(String name){
         return name.length()>10;
-    }
-
-    private boolean isCourseEmpty(){
-        return TextUtils.isEmpty(course);
     }
 
     private boolean isDateValid(String data){

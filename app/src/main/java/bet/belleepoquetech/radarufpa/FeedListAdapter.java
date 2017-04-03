@@ -89,19 +89,6 @@ public class FeedListAdapter extends BaseAdapter {
             statusMsg.setVisibility(View.GONE);
         }
 
-        // Checking for null feed url
-        /*if (item.getUrl() != null) {
-            url.setText(Html.fromHtml("<a href=\"" + item.getUrl() + "\">"
-                    + item.getUrl() + "</a> "));
-
-            // Making url clickable
-            url.setMovementMethod(LinkMovementMethod.getInstance());
-            url.setVisibility(View.VISIBLE);
-        } else {
-            // url is null, remove from the view
-            url.setVisibility(View.GONE);
-        }*/
-
         // user profile pic
         profilePic.setImageUrl(item.getProfilePic(), imageLoader);
 
@@ -125,5 +112,10 @@ public class FeedListAdapter extends BaseAdapter {
 
         return convertView;
     }
+
+    public void clearData(){
+        feedItems.clear();
+    }
+
 
 }

@@ -86,6 +86,7 @@
             android:layout_width="match_parent">
 
             <ImageView
+                android:id="@+id/likeBtn"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/icon_like"
@@ -93,6 +94,7 @@
                 android:layout_marginLeft="15dp"/>
 
             <ImageView
+                android:id="@+id/commentBtn"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/icon_comment"

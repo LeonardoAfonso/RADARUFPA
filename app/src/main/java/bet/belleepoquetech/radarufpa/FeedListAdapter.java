@@ -7,6 +7,7 @@ package bet.belleepoquetech.radarufpa;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.text.Html;
 import android.text.TextUtils;
@@ -16,12 +17,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 
 public class FeedListAdapter extends BaseAdapter {
+    private ImageView like;
+    private ImageView comment;
     private Activity activity;
     private LayoutInflater inflater;
     private List<FeedItem> feedItems;
@@ -31,6 +37,7 @@ public class FeedListAdapter extends BaseAdapter {
         this.activity = activity;
         this.feedItems = feedItems;
     }
+
 
     @Override
     public int getCount() {
@@ -109,6 +116,38 @@ public class FeedListAdapter extends BaseAdapter {
         } else {
             feedImageView.setVisibility(View.GONE);
         }
+
+
+        like = (ImageView)convertView.findViewById(R.id.likeBtn);
+        like.setTag("notliked");
+
+        like.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(v.getTag()!= null && v.getTag().toString().equals("notliked")){
+                    Toast.makeText(activity.getApplicationContext(),"Liked",Toast.LENGTH_LONG);
+                    like.setImageResource(R.drawable.icon_liked);
+                    like.setTag("liked");
+                }else if(v.getTag()!= null && v.getTag().toString().equals("liked")){
+                    Toast.makeText(activity.getApplicationContext(),"Disliked",Toast.LENGTH_LONG);
+                    like.setImageResource(R.drawable.icon_like);
+                    like.setTag("notliked");
+                }
+
+
+            }
+        });
+
+        comment = (ImageView)convertView.findViewById(R.id.commentBtn);
+        comment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Dialog commentDialog = new Dialog(activity.getApplicationContext());
+                commentDialog.setContentView(R.layout.comments_dialog_layout);
+                commentDialog.setCanceledOnTouchOutside(true);
+                commentDialog.setCancelable(true);
+            }
+        });
 
         return convertView;
     }

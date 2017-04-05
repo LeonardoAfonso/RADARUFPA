@@ -1,6 +1,8 @@
 package bet.belleepoquetech.radarufpa;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -38,6 +40,7 @@ public class FeedFragment extends Fragment {
     //private String URL_FEED = "http://api.androidhive.info/feed/feed.json";
     private String URL_FEED = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/feed";
     private SwipeRefreshLayout swipeRefreshLayout;
+    private SharedPreferences sp;
 
     public FeedFragment() {
         // Required empty public constructor
@@ -142,8 +145,15 @@ public class FeedFragment extends Fragment {
                 JSONObject feedObj = (JSONObject) feedArray.get(i);
 
                 FeedItem item = new FeedItem();
+
                 item.setId(feedObj.getInt("id"));
+
                 JSONObject user = feedObj.getJSONObject("user");
+                JSONArray like = feedObj.getJSONArray("like");
+
+                sp = getContext().getSharedPreferences(getString(R.string.SharedPreferences), Context.MODE_PRIVATE);
+
+                item.setLiked(hasLiked(like,sp.getString("id",null),feedObj.getInt("id")));
 
                 item.setName(user.getString("name"));
 
@@ -156,13 +166,6 @@ public class FeedFragment extends Fragment {
                 item.setProfilePic("http://api.androidhive.info/feed/img/nat.jpg");
                 item.setTimeStamp(feedObj.getString("created_at"));
 
-                /*
-                String image = feedObj.isNull("image") ? null : feedObj.getString("image");
-                item.setImge(image);
-                item.setStatus(feedObj.getString("status"));
-                item.setProfilePic(feedObj.getString("profilePic"));
-                item.setTimeStamp(feedObj.getString("timeStamp"));
-                */
 
                 feedItems.add(item);
             }
@@ -172,6 +175,28 @@ public class FeedFragment extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean hasLiked(JSONArray jsonArray, String user_id, int post_id) throws JSONException {
+        Boolean v = false;
+        if(jsonArray.length() == 0){
+            Log.i("curtida","array eh vazio");
+            return false;
+       }else{
+           for(int i=0;i<jsonArray.length();i++){
+               JSONObject json = (JSONObject) jsonArray.get(i);
+               Log.i("curtida","user_id "+user_id+ "|| "+String.valueOf(json.getInt("user_id")));
+               Log.i("curtida","post_id "+post_id+ "|| "+json.getInt("post_id"));
+               Log.i("curtida","comparacao user id = "+ String.valueOf(String.valueOf(json.getInt("user_id")).equals(user_id)));
+               Log.i("curtida","comparacao post id = "+String.valueOf(json.getInt("post_id") == post_id));
+               if(String.valueOf(json.getInt("user_id")).equals(user_id) && json.getInt("post_id") == post_id ){
+                   Log.i("curtida","post:"+post_id+" tem curtida");
+                   v = true;
+               }
+           }
+           Log.i("curtida","valor de v"+ String.valueOf(v));
+           return v;
+       }
     }
 
 }

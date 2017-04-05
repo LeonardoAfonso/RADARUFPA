@@ -7,12 +7,13 @@ package bet.belleepoquetech.radarufpa;
 public class FeedItem {
     private int id;
     private String name, status, image, profilePic, timeStamp, url;
+    private boolean liked;
 
     public FeedItem() {
     }
 
     public FeedItem(int id, String name, String image, String status,
-                    String profilePic, String timeStamp, String url) {
+                    String profilePic, String timeStamp, Boolean like) {
         super();
         this.id = id;
         this.name = name;
@@ -20,6 +21,7 @@ public class FeedItem {
         this.status = status;
         this.profilePic = profilePic;
         this.timeStamp = timeStamp;
+        this.liked = like;
     }
 
     public int getId() {
@@ -68,6 +70,14 @@ public class FeedItem {
 
     public void setTimeStamp(String timeStamp) {
         this.timeStamp = timeStamp;
+    }
+
+    public boolean isLiked() {
+        return liked;
+    }
+
+    public void setLiked(boolean liked) {
+        this.liked = liked;
     }
 
 }

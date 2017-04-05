@@ -4,15 +4,22 @@ package bet.belleepoquetech.radarufpa;
  * Created by AEDI on 17/02/17.
  */
 
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,12 +29,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class FeedListAdapter extends BaseAdapter {
-    private ImageView like;
-    private ImageView comment;
+    private String LIKE_URL ="http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/like";
+    private SharedPreferences sp;
     private Activity activity;
     private LayoutInflater inflater;
     private List<FeedItem> feedItems;
@@ -77,7 +90,7 @@ public class FeedListAdapter extends BaseAdapter {
         FeedImageView feedImageView = (FeedImageView) convertView
                 .findViewById(R.id.feedImage1);
 
-        FeedItem item = feedItems.get(position);
+        final FeedItem item = feedItems.get(position);
 
         name.setText(item.getName());
 
@@ -117,35 +130,46 @@ public class FeedListAdapter extends BaseAdapter {
             feedImageView.setVisibility(View.GONE);
         }
 
-
+        final ImageView like;
         like = (ImageView)convertView.findViewById(R.id.likeBtn);
-        like.setTag("notliked");
+
+        if(item.isLiked()){
+            like.setImageResource(R.drawable.icon_liked);
+            like.setTag("liked");
+        }else{
+            like.setImageResource(R.drawable.icon_like);
+            like.setTag("notliked");
+        }
+
 
         like.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(v.getTag()!= null && v.getTag().toString().equals("notliked")){
-                    Toast.makeText(activity.getApplicationContext(),"Liked",Toast.LENGTH_LONG);
+                if(like.getTag()!= null && like.getTag().toString().equals("notliked")){
+                    Toast.makeText(activity.getApplicationContext(),"Liked",Toast.LENGTH_LONG).show();
                     like.setImageResource(R.drawable.icon_liked);
                     like.setTag("liked");
-                }else if(v.getTag()!= null && v.getTag().toString().equals("liked")){
-                    Toast.makeText(activity.getApplicationContext(),"Disliked",Toast.LENGTH_LONG);
-                    like.setImageResource(R.drawable.icon_like);
-                    like.setTag("notliked");
+                    like(item);
+                }else if(like.getTag()!= null && like.getTag().toString().equals("liked")){
+                    Toast.makeText(activity.getApplicationContext(),"Disliked",Toast.LENGTH_LONG).show();
+                    //like.setImageResource(R.drawable.icon_like);
+                    //like.setTag("notliked");
+                    //dislike(item);
                 }
 
 
             }
         });
-
+        ImageView comment;
         comment = (ImageView)convertView.findViewById(R.id.commentBtn);
         comment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Dialog commentDialog = new Dialog(activity.getApplicationContext());
+                Dialog commentDialog = new Dialog(activity);
                 commentDialog.setContentView(R.layout.comments_dialog_layout);
                 commentDialog.setCanceledOnTouchOutside(true);
                 commentDialog.setCancelable(true);
+                commentDialog.show();
             }
         });
 
@@ -154,6 +178,62 @@ public class FeedListAdapter extends BaseAdapter {
 
     public void clearData(){
         feedItems.clear();
+    }
+
+    public void like(FeedItem item){
+        sp = this.activity.getSharedPreferences(activity.getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
+        Map<String,String> params = new HashMap<>();
+        params.put("post_id", String.valueOf(item.getId()));
+        CustomJSONObjectResquest likeReq = new CustomJSONObjectResquest(Request.Method.POST,LIKE_URL+"?token="+sp.getString("token",null),params, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    Log.i("response",response.getString("response"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                try {
+                    JSONObject json = new JSONObject( new String(error.networkResponse.data) );
+                    Log.i("Erro",json.getString("erro"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    String body="";
+                    if(error.networkResponse.data!=null) {
+                        try {
+                            body = new String(error.networkResponse.data,"UTF-8");
+                        } catch (UnsupportedEncodingException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                    Log.e("Erro","Corpo \n" + body.split("</head>")[1]);
+                }
+            }
+            });
+
+        AppController.getInstance().addToRequestQueue(likeReq);
+        }
+
+
+    public void dislike(FeedItem item){
+        CustomJSONObjectResquest dislikeReq = new CustomJSONObjectResquest("",null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+
+    AppController.getInstance().addToRequestQueue(dislikeReq);
+
     }
 
 

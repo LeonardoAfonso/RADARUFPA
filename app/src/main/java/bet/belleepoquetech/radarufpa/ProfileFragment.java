@@ -68,6 +68,15 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onResponse(JSONObject response) {
                 Log.i("UserResponse","reponse: " + response);
+                SharedPreferences.Editor edt = mSharedPreferences.edit();
+                try {
+                    edt.putString("id",response.getString("id"));
+                    edt.putString("email",response.getString("email"));
+                    edt.apply();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
                 try {
                     txtNome.setText(response.getString("name"));
                     txtTipo.setText(response.getString("type"));

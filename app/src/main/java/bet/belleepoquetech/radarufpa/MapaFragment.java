@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -81,6 +82,8 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
     private SharedPreferences mSharedPreferences;
     private Dialog view;
     static final int REQUEST_TAKE_PHOTO = 1;
+    private ImageView img;
+    private Spinner pontoSpn;
     String mCurrentPhotoPath;
     private Uri mcurrentPhotoUri;
     private String UPLOAD_URL = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/publication";
@@ -151,8 +154,6 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
         map.getUiSettings().setMapToolbarEnabled(false);
-        //rq.cancelAll("tag");
-        //map.getUiSettings().setZoomControlsEnabled(true);
         CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(-1.4749331, -48.4555419), 16);
         map.moveCamera(update);
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
@@ -205,12 +206,22 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_CANCELED) {
-            if (data != null) {
+            //if (data != null) {
                 if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
                     File file = new File(mCurrentPhotoPath);
+                    galleryAddPic();
                     picDialog(Uri.fromFile(file));
+
+                    Log.i("Foto","Retornou a foto");
                 }
-            }
+                else{
+                    Log.i("Foto","requestcode e resultcode deu diferente");
+                }
+           // }else{
+            //    Log.i("foto","data eh null");
+            //}
+        }else{
+            Log.i("foto","resultCode eh igual a Result_canceled");
         }
     }
 
@@ -267,13 +278,18 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         int device_TotalWidth = metrics.widthPixels;
         int device_TotalHeight = metrics.heightPixels;
+
         view.getWindow().setLayout(device_TotalWidth*80/100, device_TotalHeight*70/100);
         view.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        ImageView img = (ImageView) view.findViewById(R.id.imageView);
+
+        img = (ImageView) view.findViewById(R.id.imageView);
+        //setPic();
         img.setImageURI(imagem);
+
         Button btn = (Button) view.findViewById(R.id.btnCancelar);
         Button btnSalvar = (Button) view.findViewById(R.id.btnSalvar);
-        final Spinner pontoSpn = (Spinner) view.findViewById(R.id.pontoSpn);
+
+        pontoSpn = (Spinner) view.findViewById(R.id.pontoSpn);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R.array.tipo_pontos_array, android.R.layout.simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         pontoSpn.setAdapter(adapter);
@@ -365,6 +381,31 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
 
         AppController.getInstance().addToRequestQueue(multipartRequest);
         view.dismiss();
+    }
+
+
+    private void setPic() {
+        // Get the dimensions of the View
+        int targetW = img.getWidth();
+        int targetH = img.getHeight();
+
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        img.setImageBitmap(bitmap);
     }
 
 }

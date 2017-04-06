@@ -5,6 +5,7 @@ package bet.belleepoquetech.radarufpa;
  */
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,19 +14,17 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.text.Html;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,15 +34,21 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class FeedListAdapter extends BaseAdapter {
     private String LIKE_URL ="http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/like";
+    private String DISLIKE_URL ="http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/dislike";
+    private String COMMENT_URL ="http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/addcomment";
+    private String GETCOMMENT_URL ="http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/getcomments";
     private SharedPreferences sp;
     private Activity activity;
     private LayoutInflater inflater;
     private List<FeedItem> feedItems;
+    private List<CommentItem> commentItems;
+    private CommentListAdpter commentListAdapter;
     ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
     public FeedListAdapter(Activity activity, List<FeedItem> feedItems) {
@@ -131,7 +136,7 @@ public class FeedListAdapter extends BaseAdapter {
         }
 
         final ImageView like;
-        like = (ImageView)convertView.findViewById(R.id.likeBtn);
+        like = (ImageView) convertView.findViewById(R.id.likeBtn);
 
         if(item.isLiked()){
             like.setImageResource(R.drawable.icon_liked);
@@ -145,22 +150,24 @@ public class FeedListAdapter extends BaseAdapter {
         like.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ImageView like = (ImageView) v;
                 if(like.getTag()!= null && like.getTag().toString().equals("notliked")){
                     Toast.makeText(activity.getApplicationContext(),"Liked",Toast.LENGTH_LONG).show();
                     like.setImageResource(R.drawable.icon_liked);
                     like.setTag("liked");
                     like(item);
+                    //notifyDataSetChanged();
                 }else if(like.getTag()!= null && like.getTag().toString().equals("liked")){
                     Toast.makeText(activity.getApplicationContext(),"Disliked",Toast.LENGTH_LONG).show();
-                    //like.setImageResource(R.drawable.icon_like);
-                    //like.setTag("notliked");
-                    //dislike(item);
+                    like.setImageResource(R.drawable.icon_like);
+                    like.setTag("notliked");
+                    dislike(item);
+                    //notifyDataSetChanged();
                 }
-
-
+                //notifyDataSetChanged();
             }
         });
-        ImageView comment;
+        final ImageView comment;
         comment = (ImageView)convertView.findViewById(R.id.commentBtn);
         comment.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -169,6 +176,33 @@ public class FeedListAdapter extends BaseAdapter {
                 commentDialog.setContentView(R.layout.comments_dialog_layout);
                 commentDialog.setCanceledOnTouchOutside(true);
                 commentDialog.setCancelable(true);
+                ImageView img = (ImageView) commentDialog.findViewById(R.id.imgComment);
+                ImageButton btn = (ImageButton) commentDialog.findViewById(R.id.sendBtn);
+                final EditText edt = (EditText)commentDialog.findViewById(R.id.edtComment);
+
+                ListView list = (ListView) commentDialog.findViewById(R.id.list_comment);
+                commentItems = new ArrayList<>();
+                commentListAdapter = new CommentListAdpter(activity,commentItems);
+                list.setAdapter(commentListAdapter);
+                getComments(item);
+                commentListAdapter.notifyDataSetChanged();
+
+                if(item.isLiked()){
+                    img.setImageResource(R.drawable.icon_liked);
+                }else{
+                    img.setImageResource(R.drawable.icon_like);
+                }
+
+                btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String comment = edt.getText().toString();
+                        addComment(item,comment);
+                        edt.setText("");
+                    }
+                });
+
+
                 commentDialog.show();
             }
         });
@@ -219,20 +253,139 @@ public class FeedListAdapter extends BaseAdapter {
 
 
     public void dislike(FeedItem item){
-        CustomJSONObjectResquest dislikeReq = new CustomJSONObjectResquest("",null, new Response.Listener<JSONObject>() {
+        sp = this.activity.getSharedPreferences(activity.getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
+        Map<String,String> params = new HashMap<>();
+        params.put("post_id", String.valueOf(item.getId()));
+        CustomJSONObjectResquest dislikeReq = new CustomJSONObjectResquest(Request.Method.POST,DISLIKE_URL+"?token="+sp.getString("token",null),params, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-
+                try {
+                    Log.i("response",response.getString("response"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                try {
+                    JSONObject json = new JSONObject( new String(error.networkResponse.data) );
+                    Log.i("Erro",json.getString("erro"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    String body="";
+                    if(error.networkResponse.data!=null) {
+                        try {
+                            body = new String(error.networkResponse.data,"UTF-8");
+                        } catch (UnsupportedEncodingException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                    Log.e("Erro","Corpo \n" + body.split("</head>")[1]);
+                }
             }
         });
 
     AppController.getInstance().addToRequestQueue(dislikeReq);
+
+    }
+
+    public void addComment(FeedItem item, String comment){
+        sp = this.activity.getSharedPreferences(activity.getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
+        Map<String,String> params = new HashMap<>();
+        params.put("post_id", String.valueOf(item.getId()));
+        params.put("texto",comment);
+        CustomJSONObjectResquest commentReq = new CustomJSONObjectResquest(Request.Method.POST,COMMENT_URL+"?token="+sp.getString("token",null),params, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    Log.i("response", response.getString("message"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                try {
+                    JSONObject json = new JSONObject( new String(error.networkResponse.data) );
+                    Log.i("Erro",json.getString("erro"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    String body="";
+                    if(error.networkResponse.data!=null) {
+                        try {
+                            body = new String(error.networkResponse.data,"UTF-8");
+                        } catch (UnsupportedEncodingException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                    Log.e("Erro","Corpo \n" + body.split("</head>")[1]);
+                }
+            }
+        });
+
+        AppController.getInstance().addToRequestQueue(commentReq);
+
+    }
+
+
+
+    public void getComments(FeedItem item){
+        sp = this.activity.getSharedPreferences(activity.getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
+        Map<String,String> params = new HashMap<>();
+        params.put("post_id", String.valueOf(item.getId()));
+        CustomJSONObjectResquest commentReq = new CustomJSONObjectResquest(Request.Method.POST,GETCOMMENT_URL+"?token="+sp.getString("token",null),params, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    commentListAdapter.clearData();
+                    JSONArray json = response.getJSONArray("comments");
+                    Log.i("comments",json.get(0).toString());
+
+                    for(int i=0;i<json.length();i++) {
+                        JSONObject obj = (JSONObject) json.get(i);
+                        Log.i("comments", "adicionando comentario " + i);
+
+                        CommentItem item = new CommentItem();
+                        item.setId(obj.getInt("id"));
+                        item.setName(obj.getJSONObject("user").getString("name"));
+                        item.setTexto(obj.getString("texto"));
+                        item.setTimestamp("1491399067");
+                        item.setProfilePic("http://api.androidhive.info/feed/img/nat.jpg");
+
+                        commentItems.add(item);
+                    }
+
+                    commentListAdapter.notifyDataSetChanged();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                try {
+                    JSONObject json = new JSONObject( new String(error.networkResponse.data) );
+                    Log.i("Erro",json.getString("erro"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    String body="";
+                    if(error.networkResponse.data!=null) {
+                        try {
+                            body = new String(error.networkResponse.data,"UTF-8");
+                        } catch (UnsupportedEncodingException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                    Log.e("Erro","Corpo \n" + body.split("</head>")[1]);
+                }
+            }
+        });
+
+        AppController.getInstance().addToRequestQueue(commentReq);
 
     }
 

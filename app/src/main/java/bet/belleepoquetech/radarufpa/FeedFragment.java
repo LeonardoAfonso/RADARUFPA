@@ -185,16 +185,16 @@ public class FeedFragment extends Fragment {
        }else{
            for(int i=0;i<jsonArray.length();i++){
                JSONObject json = (JSONObject) jsonArray.get(i);
-               Log.i("curtida","user_id "+user_id+ "|| "+String.valueOf(json.getInt("user_id")));
-               Log.i("curtida","post_id "+post_id+ "|| "+json.getInt("post_id"));
-               Log.i("curtida","comparacao user id = "+ String.valueOf(String.valueOf(json.getInt("user_id")).equals(user_id)));
-               Log.i("curtida","comparacao post id = "+String.valueOf(json.getInt("post_id") == post_id));
+               //Log.i("curtida","user_id "+user_id+ "|| "+String.valueOf(json.getInt("user_id")));
+              // Log.i("curtida","post_id "+post_id+ "|| "+json.getInt("post_id"));
+               //Log.i("curtida","comparacao user id = "+ String.valueOf(String.valueOf(json.getInt("user_id")).equals(user_id)));
+               //Log.i("curtida","comparacao post id = "+String.valueOf(json.getInt("post_id") == post_id));
                if(String.valueOf(json.getInt("user_id")).equals(user_id) && json.getInt("post_id") == post_id ){
                    Log.i("curtida","post:"+post_id+" tem curtida");
                    v = true;
                }
            }
-           Log.i("curtida","valor de v"+ String.valueOf(v));
+           //Log.i("curtida","valor de v"+ String.valueOf(v));
            return v;
        }
     }

@@ -26,6 +26,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.android.volley.AuthFailureError;
@@ -61,9 +62,13 @@ public class LoginActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        // Set up the login form.
+        // Set up the login form
+        mLoginFormView = findViewById(R.id.login_form);
+        mProgressView = findViewById(R.id.login_progress);
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         mPasswordView = (EditText) findViewById(R.id.password);
+        //mProgressView = (ProgressBar) findViewById(R.id.login_progress);
+        //mProgressView.setIndeterminate(true);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -91,8 +96,6 @@ public class LoginActivity extends AppCompatActivity{
                 startActivity(it);
             }
         });
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
     }
 
     public void changeActivity() {
@@ -152,7 +155,8 @@ public class LoginActivity extends AppCompatActivity{
         if (cancel) {
             focusView.requestFocus();
         } else {
-            //showProgress(true);
+            //mProgressView.setVisibility(View.VISIBLE);
+            showProgress(true);
             HashMap<String,String>params = new HashMap<>();
             params.put("email",email);
             params.put("password",md5(password));
@@ -166,6 +170,7 @@ public class LoginActivity extends AppCompatActivity{
                             Log.i("JSONResponse","Sucesso: \n "+response);
                             mSharedPreferences = getApplicationContext().getSharedPreferences(getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
                             SharedPreferences.Editor editor = mSharedPreferences.edit();
+                            //mProgressView.setVisibility(View.GONE);
                             try {
                                 Log.i("token",response.getString("token"));
                                 editor.putString("token",response.getString("token"));
@@ -181,9 +186,12 @@ public class LoginActivity extends AppCompatActivity{
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             Log.i("JSONResponse","Erro "+ error);
+                            //mProgressView.setVisibility(View.GONE);
+                            showProgress(false);
                             if (error instanceof AuthFailureError) {
-                                mEmailView.setError("Email incorreto");
-                                mPasswordView.setError("Senha incorreta");
+                                //mEmailView.setError("Email incorreto");
+                                mPasswordView.setError("Email ou senha incorreta");
+                                Log.e("erro",new String(error.networkResponse.data));
                                // Toast.makeText(getApplicationContext(),"AuthFailureError" ,Toast.LENGTH_LONG).show();
                             } else if (error instanceof ServerError) {
                                 Toast.makeText(getApplicationContext(),"Erro no servido, tente mais tarde.." ,Toast.LENGTH_LONG).show();
@@ -197,7 +205,43 @@ public class LoginActivity extends AppCompatActivity{
             );
             AppController.getInstance().addToRequestQueue(req);
         }
+
     }
+
+/**
+ * Shows the progress UI and hides the login form.
+ */
+         @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+         private void showProgress(final boolean show) {
+             // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+             // for very easy animations. If available, use these APIs to fade-in
+             // the progress spinner.
+             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+                 int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+                 mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                 mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+                 show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                     @Override
+                     public void onAnimationEnd(Animator animation) {
+                     mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                     }
+                     });
+
+             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+             mProgressView.animate().setDuration(shortAnimTime).alpha(
+             show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+             @Override
+             public void onAnimationEnd(Animator animation) {
+                     mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                 }
+             });
+             } else {
+                 // The ViewPropertyAnimator APIs are not available, so simply show
+                 // and hide the relevant UI components.
+                 mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                 mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+             }
+         }
 
     private boolean isEmailValid(String email) {
         String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
@@ -214,19 +258,6 @@ public class LoginActivity extends AppCompatActivity{
     private boolean isPasswordValid(String password) {
         return password.length() > 4;
     }
-
-    private boolean isNameValid(String name){
-        return true;
-    }
-
-    private boolean isCourseEmpty(){
-        return true;
-    }
-
-    private boolean isDateValid(){
-        return true;
-    }
-
 
 }
 

@@ -17,8 +17,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingLeft="@dimen/feed_item_padding_left_right"
-            android:paddingRight="@dimen/feed_item_padding_left_right" >
+             >
 
             <com.android.volley.toolbox.NetworkImageView
                 android:id="@+id/profilePic"

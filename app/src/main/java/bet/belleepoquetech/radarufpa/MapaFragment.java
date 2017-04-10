@@ -283,7 +283,7 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         view.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
         img = (ImageView) view.findViewById(R.id.imageView);
-        //setPic();
+        setPic();
         img.setImageURI(imagem);
 
         Button btn = (Button) view.findViewById(R.id.btnCancelar);
@@ -386,8 +386,8 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
 
     private void setPic() {
         // Get the dimensions of the View
-        int targetW = img.getWidth();
-        int targetH = img.getHeight();
+        int targetW = 720;
+        int targetH = 480;
 
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();

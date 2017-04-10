@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,14 +34,19 @@ import java.util.List;
 
 public class FeedFragment extends Fragment {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private ListView listView;
-    private FeedListAdapter listAdapter;
+    //private ListView listView;
+    private RecyclerView recyclerView;
+    private MyAdapter adapter;
+    //private MyAdapter myAdapter;
+    //private FeedListAdapter listAdapter;
     private List<FeedItem> feedItems;
+    //private FeedItem [] f;
     private Cache cache;
     private Cache.Entry entry;
     //private String URL_FEED = "http://api.androidhive.info/feed/feed.json";
     private String URL_FEED = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/feed";
     private SwipeRefreshLayout swipeRefreshLayout;
+    private LinearLayoutManager mLayoutManager;
     private SharedPreferences sp;
 
     public FeedFragment() {
@@ -63,16 +70,8 @@ public class FeedFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_feed, container, false);
 
-        listView = (ListView) rootView.findViewById(R.id.list);
-
-        feedItems = new ArrayList<>();
-
-        listAdapter = new FeedListAdapter(getActivity(), feedItems);
-        listView.setAdapter(listAdapter);
-
+        //listView = (ListView) rootView.findViewById(R.id.list);
         swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe);
-
-
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -80,15 +79,18 @@ public class FeedFragment extends Fragment {
             }
         });
 
-
-
-        // These two lines not needed,
-        // just to get the look of facebook (changing background color & hiding the icon)
-        //getActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#3b5998")));
-        //getActionBar().setIcon(
-
-        new ColorDrawable(ContextCompat.getColor(getContext(),android.R.color.transparent));
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerList);
+        recyclerView.setHasFixedSize(false);
+        mLayoutManager = new LinearLayoutManager(getContext());
+        feedItems = new ArrayList<>();
         getFeed();
+        adapter = new MyAdapter(getContext(),feedItems);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(mLayoutManager);
+
+        //listAdapter = new FeedListAdapter(getActivity(), feedItems);
+        //listView.setAdapter(listAdapter);
+        new ColorDrawable(ContextCompat.getColor(getContext(),android.R.color.transparent));
         return rootView;
     }
 
@@ -138,7 +140,9 @@ public class FeedFragment extends Fragment {
 
     private void parseJsonFeed(JSONObject response) {
         try {
-            listAdapter.clearData();
+            //listAdapter.clearData();
+            adapter.clearData();
+
             JSONArray feedArray = response.getJSONArray("feed");
 
             for (int i = 0; i < feedArray.length(); i++) {
@@ -171,7 +175,8 @@ public class FeedFragment extends Fragment {
             }
 
             // notify data changes to list adapater
-            listAdapter.notifyDataSetChanged();
+            //listAdapter.notifyDataSetChanged();
+            adapter.notifyDataSetChanged();
         } catch (JSONException e) {
             e.printStackTrace();
         }

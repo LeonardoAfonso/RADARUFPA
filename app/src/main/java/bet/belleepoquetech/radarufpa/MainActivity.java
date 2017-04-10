@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.getTabAt(0).setIcon(android.R.drawable.ic_dialog_email);
         tabLayout.getTabAt(1).setIcon(android.R.drawable.ic_dialog_map);
         tabLayout.getTabAt(2).setIcon(android.R.drawable.ic_dialog_alert);
-        tabLayout.getTabAt(3).setIcon(android.R.drawable.ic_menu_directions);
+        //nardotabLayout.getTabAt(3).setIcon(android.R.drawable.ic_menu_directions);
 
 
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -67,9 +67,9 @@ public class MainActivity extends AppCompatActivity {
                     case 2:
                         toolbar.setTitle("Feed");
                         break;
-                    case 3:
-                        toolbar.setTitle("Chat");
-                        break;
+                    //case 3:
+                      //  toolbar.setTitle("Chat");
+                       // break;
                 }
             }
             @Override
@@ -99,12 +99,26 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         if(id== R.id.action_logout){
-            SharedPreferences mSharedPreferences = this.getPreferences(MODE_PRIVATE);;
-            SharedPreferences.Editor edt = mSharedPreferences.edit();
-            edt.clear();
-            edt.apply();
-            Intent it = new Intent(this,LoginActivity.class);
-            startActivity(it);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Deseja mesmo sair do RadarUFPa")
+                    .setPositiveButton("Não", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .setNegativeButton("Sim", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            SharedPreferences mSharedPreferences = getApplicationContext().getSharedPreferences(getString(R.string.SharedPreferences),MODE_PRIVATE);;
+                            SharedPreferences.Editor edt = mSharedPreferences.edit();
+                            edt.clear();
+                            edt.apply();
+                            System.exit(0);
+                        }
+                    });
+
+            builder.create().show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -162,8 +176,8 @@ public class MainActivity extends AppCompatActivity {
                     return MapaFragment.newInstance();
                 case 2:
                     return FeedFragment.newInstance();
-                case 3:
-                    return ChatFragment.newInstance();
+                //case 3:
+                    //return ChatFragment.newInstance();
             }
             return null;
         }
@@ -171,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 4;
+            return 3;
         }
         @Override
         public CharSequence getPageTitle(int position) {
@@ -182,8 +196,8 @@ public class MainActivity extends AppCompatActivity {
                     return "";
                 case 2:
                     return "";
-                case 3:
-                    return "";
+                //case 3:
+                  //  return "";
             }
             return null;
         }

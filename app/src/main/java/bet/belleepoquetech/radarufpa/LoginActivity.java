@@ -189,10 +189,10 @@ public class LoginActivity extends AppCompatActivity{
                             //mProgressView.setVisibility(View.GONE);
                             showProgress(false);
                             if (error instanceof AuthFailureError) {
-                                //mEmailView.setError("Email incorreto");
-                                mPasswordView.setError("Email ou senha incorreta");
+                                mEmailView.setError("Email pode estar incorreto");
+                                mPasswordView.setError("Senha pode estar incorreta");
                                 Log.e("erro",new String(error.networkResponse.data));
-                               // Toast.makeText(getApplicationContext(),"AuthFailureError" ,Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(),"Crendenciais incorretas" ,Toast.LENGTH_LONG).show();
                             } else if (error instanceof ServerError) {
                                 Toast.makeText(getApplicationContext(),"Erro no servido, tente mais tarde.." ,Toast.LENGTH_LONG).show();
                             } else if (error instanceof NetworkError) {

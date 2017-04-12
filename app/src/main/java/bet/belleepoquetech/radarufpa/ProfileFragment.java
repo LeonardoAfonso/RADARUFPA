@@ -18,6 +18,7 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.NetworkImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,10 +49,12 @@ public class ProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
-        ImageView circleView  = (ImageView)rootView.findViewById(R.id.circleView);
+        final NetworkImageView circleView  = (NetworkImageView)rootView.findViewById(R.id.circleView);
         Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(),R.drawable.teste);
         Bitmap circularBitmap = ImageConverter.getRoundedCornerBitmap(bitmap, 400);
         circleView.setImageBitmap(circularBitmap);
+        circleView.setDefaultImageResId(R.drawable.profile_pic);
+        circleView.setErrorImageResId(R.drawable.profile_pic);
 
         final TextView txtNome = (TextView)rootView.findViewById(R.id.txtNome);
         final TextView txtTipo = (TextView)rootView.findViewById(R.id.txtCurso);
@@ -73,11 +76,16 @@ public class ProfileFragment extends Fragment {
                     edt.putString("id",response.getString("id"));
                     edt.putString("email",response.getString("email"));
                     edt.apply();
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
                 try {
+                    JSONObject j = response.getJSONObject("profile_picture");
+                    if(!(j.getString("profile_pic_url").equals("null") || j.getString("profile_pic_url") == null)){
+                        circleView.setImageUrl("http://aedi.ufpa.br/~leonardo/radarufpa/storage/app/"+j.getString("profile_pic_url"),AppController.getInstance().getImageLoader());
+                    }
                     txtNome.setText(response.getString("name"));
                     txtTipo.setText(response.getString("type"));
                     SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd");

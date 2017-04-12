@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -58,6 +59,7 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
     private View registerView;
     private ImageView profile_pic;
     private ImageView camera;
+    private ImageView gallery;
     private Button btnRegister;
     private  EditText edtNome;
     private  EditText edtEmail;
@@ -74,6 +76,7 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
     private SimpleDateFormat df;
     private SimpleDateFormat myFormat;
     static final int REQUEST_TAKE_PHOTO = 1;
+    static final int PICK_FROM_FILE = 2;
     String mCurrentPhotoPath;
     private Uri mcurrentPhotoUri;
     File photoFile = null;
@@ -94,6 +97,18 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
         progressBar = findViewById(R.id.register_progress);
         profile_pic = (ImageView) findViewById(R.id.profile_pic);
         camera = (ImageView)findViewById(R.id.camera);
+        gallery = (ImageView)findViewById(R.id.galeria);
+
+        gallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(
+                        Intent.createChooser(
+                                new Intent(Intent.ACTION_GET_CONTENT)
+                                        .setType("image/*"), "Choose an image"),
+                        PICK_FROM_FILE);
+            }
+        });
 
         camera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -352,9 +367,17 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                 Log.i("URI", mcurrentPhotoUri.toString());
                 Log.i("PATH",mCurrentPhotoPath.toString());
             }
-            else{
-                Log.i("Foto","requestcode e resultcode deu diferente");
-            }
+            else
+                if (requestCode == PICK_FROM_FILE && resultCode == Activity.RESULT_OK)
+                {
+                    mcurrentPhotoUri = data.getData();
+                    mCurrentPhotoPath = new File(mcurrentPhotoUri.getPath()).getAbsolutePath();
+                    setPic();
+                    Log.i("Pick","Retornou a foto escolhida");
+                    Log.i("URI", mcurrentPhotoUri.toString());
+                    Log.i("PATH",mCurrentPhotoPath);
+                }else{}
+
             // }else{
             //    Log.i("foto","data eh null");
             //}

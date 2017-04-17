@@ -14,14 +14,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,16 +31,11 @@ import java.util.List;
 
 public class FeedFragment extends Fragment {
     private static final String TAG = MainActivity.class.getSimpleName();
-    //private ListView listView;
     private RecyclerView recyclerView;
-    private MyAdapter adapter;
-    //private MyAdapter myAdapter;
-    //private FeedListAdapter listAdapter;
+    private FeedListAdapter adapter;
     private List<FeedItem> feedItems;
-    //private FeedItem [] f;
     private Cache cache;
     private Cache.Entry entry;
-    //private String URL_FEED = "http://api.androidhive.info/feed/feed.json";
     private String URL_FEED = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/feed";
     private SwipeRefreshLayout swipeRefreshLayout;
     private LinearLayoutManager mLayoutManager;
@@ -70,7 +62,6 @@ public class FeedFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_feed, container, false);
 
-        //listView = (ListView) rootView.findViewById(R.id.list);
         swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -84,12 +75,10 @@ public class FeedFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         feedItems = new ArrayList<>();
         getFeed();
-        adapter = new MyAdapter(getContext(),feedItems);
+        adapter = new FeedListAdapter(getContext(),feedItems);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(mLayoutManager);
 
-        //listAdapter = new FeedListAdapter(getActivity(), feedItems);
-        //listView.setAdapter(listAdapter);
         new ColorDrawable(ContextCompat.getColor(getContext(),android.R.color.transparent));
         return rootView;
     }
@@ -113,7 +102,7 @@ public class FeedFragment extends Fragment {
 
         } else {
             // making fresh volley request and getting json
-            JsonObjectRequest jsonReq = new JsonObjectRequest(Request.Method.GET,
+            CustomJSONObjectResquest jsonReq = new CustomJSONObjectResquest(Request.Method.GET,
                     URL_FEED, null, new Response.Listener<JSONObject>() {
 
                 @Override
@@ -140,7 +129,6 @@ public class FeedFragment extends Fragment {
 
     private void parseJsonFeed(JSONObject response) {
         try {
-            //listAdapter.clearData();
             adapter.clearData();
 
             JSONArray feedArray = response.getJSONArray("feed");
@@ -167,15 +155,17 @@ public class FeedFragment extends Fragment {
                 String image = picture.isNull("url") ? null : picture.getString("url");
                 item.setImge("http://aedi.ufpa.br/~leonardo/radarufpa/storage/app/"+image);
                 item.setStatus(feedObj.getString("descricao"));
-                item.setProfilePic("http://api.androidhive.info/feed/img/nat.jpg");
+
+                if(user.getJSONObject("profile_picture").isNull("profile_pic_url")){
+                    item.setProfilePic("");
+                }else {
+                    item.setProfilePic(user.getJSONObject("profile_picture").getString("profile_pic_url"));
+                }
                 item.setTimeStamp(feedObj.getString("created_at"));
 
 
                 feedItems.add(item);
             }
-
-            // notify data changes to list adapater
-            //listAdapter.notifyDataSetChanged();
             adapter.notifyDataSetChanged();
         } catch (JSONException e) {
             e.printStackTrace();
@@ -190,16 +180,11 @@ public class FeedFragment extends Fragment {
        }else{
            for(int i=0;i<jsonArray.length();i++){
                JSONObject json = (JSONObject) jsonArray.get(i);
-               //Log.i("curtida","user_id "+user_id+ "|| "+String.valueOf(json.getInt("user_id")));
-              // Log.i("curtida","post_id "+post_id+ "|| "+json.getInt("post_id"));
-               //Log.i("curtida","comparacao user id = "+ String.valueOf(String.valueOf(json.getInt("user_id")).equals(user_id)));
-               //Log.i("curtida","comparacao post id = "+String.valueOf(json.getInt("post_id") == post_id));
                if(String.valueOf(json.getInt("user_id")).equals(user_id) && json.getInt("post_id") == post_id ){
                    Log.i("curtida","post:"+post_id+" tem curtida");
                    v = true;
                }
            }
-           //Log.i("curtida","valor de v"+ String.valueOf(v));
            return v;
        }
     }

@@ -2,12 +2,14 @@ package bet.belleepoquetech.radarufpa;
 
 import android.app.Activity;
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
@@ -19,75 +21,66 @@ import java.util.List;
  * Created by AEDI on 06/04/17.
  */
 
-public class CommentListAdpter extends BaseAdapter {
-    private Activity activity;
-    private LayoutInflater inflater;
+public class CommentListAdpter extends RecyclerView.Adapter<CommentListAdpter.ViewHolder> {
+    private Context ctx;
     private List<CommentItem> commentItems;
     ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        // each data item is just a string in this case
 
-    public CommentListAdpter(Activity activity, List<CommentItem> commentItems) {
-        this.activity = activity;
-        this.commentItems = commentItems;
+        public TextView status;
+        public TextView timestamp;
+        public TextView name;
+        public NetworkImageView profilePic;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            status = (TextView)itemView.findViewById(R.id.txtStatusMsg);
+            timestamp = (TextView)itemView.findViewById(R.id.timestamp);
+            name = (TextView)itemView.findViewById(R.id.name);
+            profilePic = (NetworkImageView) itemView.findViewById(R.id.profilePic);
+        }
+    }
+
+    public CommentListAdpter(Context ctx, List<CommentItem> lista){
+        this.commentItems = lista;
+        this.ctx = ctx;
     }
 
     @Override
-    public int getCount() {
-        return commentItems.size();
+    public CommentListAdpter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.comment_item, parent, false);
+        ViewHolder vh = new ViewHolder(v);
+        return vh;
     }
 
     @Override
-    public Object getItem(int position) {
-        return commentItems.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (inflater == null)
-            inflater = (LayoutInflater) activity
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if (convertView == null)
-            convertView = inflater.inflate(R.layout.comment_item, null);
-
+    public void onBindViewHolder(CommentListAdpter.ViewHolder holder, int position) {
         if (imageLoader == null)
             imageLoader = AppController.getInstance().getImageLoader();
+        // - get element from your dataset at this position
+        // - replace the contents of the view with that element
+        holder.status.setText(commentItems.get(position).getTexto());
+        holder.timestamp.setText(commentItems.get(position).getTimestamp());
+        holder.name.setText(commentItems.get(position).getName());
 
-        TextView name = (TextView) convertView.findViewById(R.id.name);
-        TextView timestamp = (TextView) convertView
-                .findViewById(R.id.timestamp);
-        TextView statusMsg = (TextView) convertView
-                .findViewById(R.id.txtStatusMsg);
-        NetworkImageView profilePic = (NetworkImageView) convertView
-                .findViewById(R.id.profilePic);
-
-        final CommentItem item = commentItems.get(position);
-
-        name.setText(item.getName());
-
-        CharSequence timeAgo = DateUtils.getRelativeTimeSpanString(
-                Long.parseLong(item.getTimestamp()),
-                System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS);
-        timestamp.setText(timeAgo);
-
-        // Chcek for empty status message
-         if (!TextUtils.isEmpty(item.getTexto())) {
-            statusMsg.setText(item.getTexto());
-            statusMsg.setVisibility(View.VISIBLE);
-        } else {
-            statusMsg.setVisibility(View.GONE);
+        if(commentItems.get(position).getProfilePic().equals("") && commentItems.get(position).getProfilePic() == null){
+            holder.profilePic.setImageResource(R.drawable.profile_pic);
+        }else{
+            holder.profilePic.setErrorImageResId(R.drawable.profile_pic);
+            holder.profilePic.setDefaultImageResId(R.drawable.profile_pic);
+            holder.profilePic.setImageUrl(commentItems.get(position).getProfilePic(),imageLoader);
         }
+    }
 
-        profilePic.setImageUrl(item.getProfilePic(), imageLoader);
-
-        return convertView;
+    @Override
+    public int getItemCount() {
+        return commentItems.size();
     }
 
     public void clearData(){
         commentItems.clear();
     }
+
 }

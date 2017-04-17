@@ -1,30 +1,15 @@
 package bet.belleepoquetech.radarufpa;
 
-/**
- * Created by AEDI on 17/02/17.
- */
-
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.text.TextUtils;
+import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,94 +19,101 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class FeedListAdapter extends BaseAdapter {
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by AEDI on 10/04/17.
+ */
+
+public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHolder> {
+
+    // Provide a reference to the views for each data item
+    // Complex data items may need more than one view per item, and
+    // you provide access to all the views for a data item in a view holder
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        // each data item is just a string in this case
+
+        public TextView status;
+        public TextView timestamp;
+        public TextView name;
+        public NetworkImageView profilePic;
+        public FeedImageView feedImageView;
+        public ImageView likeBtn;
+        public ImageView commentBtn;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            status = (TextView)itemView.findViewById(R.id.txtStatusMsg);
+            timestamp = (TextView)itemView.findViewById(R.id.timestamp);
+            name = (TextView)itemView.findViewById(R.id.name);
+            profilePic = (NetworkImageView) itemView.findViewById(R.id.profilePic);
+            feedImageView = (FeedImageView) itemView.findViewById(R.id.feedImage1);
+            likeBtn = (ImageView) itemView.findViewById(R.id.likeBtn);
+            commentBtn = (ImageView) itemView.findViewById(R.id.commentBtn);
+        }
+    }
+
+    private List<FeedItem> mDataset;
+    private Context ctx;
+    ImageLoader imageLoader = AppController.getInstance().getImageLoader();
     private String LIKE_URL ="http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/like";
     private String DISLIKE_URL ="http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/dislike";
-    private String COMMENT_URL ="http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/addcomment";
-    private String GETCOMMENT_URL ="http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/getcomments";
+    private String IMAGE_URL = "http://aedi.ufpa.br/~leonardo/radarufpa/storage/app/";
     private SharedPreferences sp;
-    private Activity activity;
-    private LayoutInflater inflater;
-    private List<FeedItem> feedItems;
-    private List<CommentItem> commentItems;
-    private CommentListAdpter commentListAdapter;
-    ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
-    public FeedListAdapter(Activity activity, List<FeedItem> feedItems) {
-        this.activity = activity;
-        this.feedItems = feedItems;
+    public FeedListAdapter(Context ctx, List<FeedItem> myDataset) {
+        this.mDataset = myDataset;
+        this.ctx = ctx;
     }
 
 
+    // Create new views (invoked by the layout manager)
     @Override
-    public int getCount() {
-        return feedItems.size();
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+        // create a new view
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_item, parent, false);
+        ViewHolder vh = new ViewHolder(v);
+        return vh;
     }
 
+    // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public Object getItem(int location) {
-        return feedItems.get(location);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-
-        if (inflater == null)
-            inflater = (LayoutInflater) activity
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if (convertView == null)
-            convertView = inflater.inflate(R.layout.feed_item, null);
-
+    public void onBindViewHolder(ViewHolder holder, final int position) {
         if (imageLoader == null)
             imageLoader = AppController.getInstance().getImageLoader();
+        // - get element from your dataset at this position
+        // - replace the contents of the view with that element
 
-        TextView name = (TextView) convertView.findViewById(R.id.name);
-        TextView timestamp = (TextView) convertView
-                .findViewById(R.id.timestamp);
-        TextView statusMsg = (TextView) convertView
-                .findViewById(R.id.txtStatusMsg);
-        TextView url = (TextView) convertView.findViewById(R.id.txtUrl);
-        NetworkImageView profilePic = (NetworkImageView) convertView
-                .findViewById(R.id.profilePic);
-        FeedImageView feedImageView = (FeedImageView) convertView
-                .findViewById(R.id.feedImage1);
 
-        final FeedItem item = feedItems.get(position);
+        holder.status.setText(mDataset.get(position).getStatus());
+        try {
+            holder.timestamp.setText(DateUtils.getRelativeTimeSpanString(relativeTime(mDataset.get(position).getTimeStamp()), System.currentTimeMillis(),DateUtils.MINUTE_IN_MILLIS));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        holder.name.setText(mDataset.get(position).getName());
 
-        name.setText(item.getName());
-
-        // Converting timestamp into x ago format
-        CharSequence timeAgo = DateUtils.getRelativeTimeSpanString(
-                Long.parseLong(item.getTimeStamp()),
-                System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS);
-        timestamp.setText(timeAgo);
-
-        // Chcek for empty status message
-        if (!TextUtils.isEmpty(item.getStatus())) {
-            statusMsg.setText(item.getStatus());
-            statusMsg.setVisibility(View.VISIBLE);
-        } else {
-            // status is empty, remove from view
-            statusMsg.setVisibility(View.GONE);
+        if(mDataset.get(position).getProfilePic().equals("") && mDataset.get(position).getProfilePic() == null){
+            holder.profilePic.setImageResource(R.drawable.profile_pic);
+        }else{
+            holder.profilePic.setErrorImageResId(R.drawable.profile_pic);
+            holder.profilePic.setDefaultImageResId(R.drawable.profile_pic);
+            holder.profilePic.setImageUrl(IMAGE_URL+mDataset.get(position).getProfilePic(),imageLoader);
         }
 
-        // user profile pic
-        profilePic.setImageUrl(item.getProfilePic(), imageLoader);
-
-        // Feed image
-        if (item.getImge() != null) {
-            feedImageView.setImageUrl(item.getImge(), imageLoader);
-            feedImageView.setVisibility(View.VISIBLE);
-            feedImageView
+        if (mDataset.get(position).getImge() != null) {
+            holder.feedImageView.setImageUrl(mDataset.get(position).getImge(), imageLoader);
+            holder.feedImageView.setVisibility(View.VISIBLE);
+            holder.feedImageView
                     .setResponseObserver(new FeedImageView.ResponseObserver() {
                         @Override
                         public void onError() {
@@ -132,90 +124,57 @@ public class FeedListAdapter extends BaseAdapter {
                         }
                     });
         } else {
-            feedImageView.setVisibility(View.GONE);
+            holder.feedImageView.setVisibility(View.GONE);
         }
 
-        final ImageView like;
-        like = (ImageView) convertView.findViewById(R.id.likeBtn);
-
-        if(item.isLiked()){
-            like.setImageResource(R.drawable.icon_liked);
-            like.setTag("liked");
+        if(mDataset.get(position).isLiked()){
+            holder.likeBtn.setImageResource(R.drawable.icon_liked);
+            holder.likeBtn.setTag("liked");
         }else{
-            like.setImageResource(R.drawable.icon_like);
-            like.setTag("notliked");
+            holder.likeBtn.setImageResource(R.drawable.icon_like);
+            holder.likeBtn.setTag("notliked");
         }
 
-
-        like.setOnClickListener(new View.OnClickListener() {
+        holder.likeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ImageView like = (ImageView) v;
                 if(like.getTag()!= null && like.getTag().toString().equals("notliked")){
-                    Toast.makeText(activity.getApplicationContext(),"Liked",Toast.LENGTH_LONG).show();
+                    Toast.makeText(ctx.getApplicationContext(),"Liked",Toast.LENGTH_LONG).show();
                     like.setImageResource(R.drawable.icon_liked);
                     like.setTag("liked");
-                    like(item);
-                    //notifyDataSetChanged();
+                    like(mDataset.get(position));
                 }else if(like.getTag()!= null && like.getTag().toString().equals("liked")){
-                    Toast.makeText(activity.getApplicationContext(),"Disliked",Toast.LENGTH_LONG).show();
+                    Toast.makeText(ctx.getApplicationContext(),"Disliked",Toast.LENGTH_LONG).show();
                     like.setImageResource(R.drawable.icon_like);
                     like.setTag("notliked");
-                    dislike(item);
-                    //notifyDataSetChanged();
+                    dislike(mDataset.get(position));
                 }
-                //notifyDataSetChanged();
             }
         });
-        final ImageView comment;
-        comment = (ImageView)convertView.findViewById(R.id.commentBtn);
-        comment.setOnClickListener(new View.OnClickListener() {
+
+        holder.commentBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Dialog commentDialog = new Dialog(activity);
-                commentDialog.setContentView(R.layout.comments_dialog_layout);
-                commentDialog.setCanceledOnTouchOutside(true);
-                commentDialog.setCancelable(true);
-                ImageView img = (ImageView) commentDialog.findViewById(R.id.imgComment);
-                ImageButton btn = (ImageButton) commentDialog.findViewById(R.id.sendBtn);
-                final EditText edt = (EditText)commentDialog.findViewById(R.id.edtComment);
-
-                ListView list = (ListView) commentDialog.findViewById(R.id.list_comment);
-                commentItems = new ArrayList<>();
-                commentListAdapter = new CommentListAdpter(activity,commentItems);
-                list.setAdapter(commentListAdapter);
-                getComments(item);
-                commentListAdapter.notifyDataSetChanged();
-
-                if(item.isLiked()){
-                    img.setImageResource(R.drawable.icon_liked);
-                }else{
-                    img.setImageResource(R.drawable.icon_like);
-                }
-
-                btn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        String comment = edt.getText().toString();
-                        addComment(item,comment);
-                        edt.setText("");
-                    }
-                });
-
-
-                commentDialog.show();
+                Intent it = new Intent(ctx,CommentActivity.class);
+                it.putExtra("id",mDataset.get(position).getId());
+                ctx.startActivity(it);
             }
         });
 
-        return convertView;
+    }
+    // Return the size of your dataset (invoked by the layout manager)
+    @Override
+    public int getItemCount() {
+        return mDataset.size();
     }
 
     public void clearData(){
-        feedItems.clear();
+        mDataset.clear();
     }
 
     public void like(FeedItem item){
-        sp = this.activity.getSharedPreferences(activity.getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
+        sp = this.ctx.getSharedPreferences(ctx.getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
         Map<String,String> params = new HashMap<>();
         params.put("post_id", String.valueOf(item.getId()));
         CustomJSONObjectResquest likeReq = new CustomJSONObjectResquest(Request.Method.POST,LIKE_URL+"?token="+sp.getString("token",null),params, new Response.Listener<JSONObject>() {
@@ -246,14 +205,14 @@ public class FeedListAdapter extends BaseAdapter {
                     Log.e("Erro","Corpo \n" + body.split("</head>")[1]);
                 }
             }
-            });
+        });
 
         AppController.getInstance().addToRequestQueue(likeReq);
-        }
+    }
 
 
     public void dislike(FeedItem item){
-        sp = this.activity.getSharedPreferences(activity.getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
+        sp = this.ctx.getSharedPreferences(ctx.getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
         Map<String,String> params = new HashMap<>();
         params.put("post_id", String.valueOf(item.getId()));
         CustomJSONObjectResquest dislikeReq = new CustomJSONObjectResquest(Request.Method.POST,DISLIKE_URL+"?token="+sp.getString("token",null),params, new Response.Listener<JSONObject>() {
@@ -287,107 +246,16 @@ public class FeedListAdapter extends BaseAdapter {
             }
         });
 
-    AppController.getInstance().addToRequestQueue(dislikeReq);
-
-    }
-
-    public void addComment(FeedItem item, String comment){
-        sp = this.activity.getSharedPreferences(activity.getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
-        Map<String,String> params = new HashMap<>();
-        params.put("post_id", String.valueOf(item.getId()));
-        params.put("texto",comment);
-        CustomJSONObjectResquest commentReq = new CustomJSONObjectResquest(Request.Method.POST,COMMENT_URL+"?token="+sp.getString("token",null),params, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    Log.i("response", response.getString("message"));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                try {
-                    JSONObject json = new JSONObject( new String(error.networkResponse.data) );
-                    Log.i("Erro",json.getString("erro"));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    String body="";
-                    if(error.networkResponse.data!=null) {
-                        try {
-                            body = new String(error.networkResponse.data,"UTF-8");
-                        } catch (UnsupportedEncodingException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                    Log.e("Erro","Corpo \n" + body.split("</head>")[1]);
-                }
-            }
-        });
-
-        AppController.getInstance().addToRequestQueue(commentReq);
+        AppController.getInstance().addToRequestQueue(dislikeReq);
 
     }
 
 
-
-    public void getComments(FeedItem item){
-        sp = this.activity.getSharedPreferences(activity.getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
-        Map<String,String> params = new HashMap<>();
-        params.put("post_id", String.valueOf(item.getId()));
-        CustomJSONObjectResquest commentReq = new CustomJSONObjectResquest(Request.Method.POST,GETCOMMENT_URL+"?token="+sp.getString("token",null),params, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    commentListAdapter.clearData();
-                    JSONArray json = response.getJSONArray("comments");
-                    Log.i("comments",json.get(0).toString());
-
-                    for(int i=0;i<json.length();i++) {
-                        JSONObject obj = (JSONObject) json.get(i);
-                        Log.i("comments", "adicionando comentario " + i);
-
-                        CommentItem item = new CommentItem();
-                        item.setId(obj.getInt("id"));
-                        item.setName(obj.getJSONObject("user").getString("name"));
-                        item.setTexto(obj.getString("texto"));
-                        item.setTimestamp("1491399067");
-                        item.setProfilePic("http://api.androidhive.info/feed/img/nat.jpg");
-
-                        commentItems.add(item);
-                    }
-
-                    commentListAdapter.notifyDataSetChanged();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                try {
-                    JSONObject json = new JSONObject( new String(error.networkResponse.data) );
-                    Log.i("Erro",json.getString("erro"));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    String body="";
-                    if(error.networkResponse.data!=null) {
-                        try {
-                            body = new String(error.networkResponse.data,"UTF-8");
-                        } catch (UnsupportedEncodingException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                    Log.e("Erro","Corpo \n" + body.split("</head>")[1]);
-                }
-            }
-        });
-
-        AppController.getInstance().addToRequestQueue(commentReq);
-
+    public long relativeTime(String timestamp) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
+        long time = sdf.parse(timestamp).getTime();
+        return time;
     }
-
-
 }
+
+

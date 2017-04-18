@@ -25,9 +25,11 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Created by AEDI on 10/04/17.
@@ -253,7 +255,13 @@ public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHo
 
     public long relativeTime(String timestamp) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
-        long time = sdf.parse(timestamp).getTime();
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        Date parsed = sdf.parse(timestamp);
+
+        SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
+        sdf2.setTimeZone(TimeZone.getTimeZone("America/Belem"));
+        long time = sdf2.parse(sdf2.format(parsed)).getTime();
         return time;
     }
 }

@@ -5,15 +5,18 @@ package bet.belleepoquetech.radarufpa;
  */
 
 public class CommentItem {
-    private int id, post_id;
+    private int id;
+    private int post_id;
+    private int user_id;
     private String texto, name, profilePic, timestamp;
 
     CommentItem(){}
 
-    public CommentItem(int id, int post_id, String texto, String name, String profilePic, String timestamp) {
+    public CommentItem(int id, int post_id,int user_id, String texto, String name, String profilePic, String timestamp) {
         super();
         this.id = id;
         this.post_id = post_id;
+        this.user_id = user_id;
         this.texto = texto;
         this.name = name;
         this.profilePic = profilePic;
@@ -34,6 +37,14 @@ public class CommentItem {
 
     public void setPost_id(int post_id) {
         this.post_id = post_id;
+    }
+
+    public int getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(int user_id) {
+        this.user_id = user_id;
     }
 
     public String getTexto() {

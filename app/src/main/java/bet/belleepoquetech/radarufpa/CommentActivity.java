@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -40,6 +41,7 @@ public class CommentActivity extends AppCompatActivity {
     private SharedPreferences sp;
     private String COMMENT_URL ="http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/addcomment";
     private String GETCOMMENT_URL ="http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/getcomments";
+    private String DELCOMMENT_URL ="http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/delcomment";
     private String IMAGE_URL = "http://aedi.ufpa.br/~leonardo/radarufpa/storage/app/";
 
     @Override
@@ -108,8 +110,10 @@ public class CommentActivity extends AppCompatActivity {
                             CommentItem item = new CommentItem();
                             item.setId(obj.getInt("id"));
                             item.setName(obj.getJSONObject("user").getString("name"));
+                            item.setUser_id(obj.getInt("user_id"));
+                            item.setPost_id(obj.getInt("post_id"));
                             item.setTexto(obj.getString("texto"));
-                            item.setTimestamp("1491399067");
+                            item.setTimestamp(obj.getString("created_at"));
                             if(obj.getJSONObject("user").getJSONObject("profile_picture").isNull("profile_pic_url")){
                                 item.setProfilePic("");
                             }else{
@@ -186,6 +190,63 @@ public class CommentActivity extends AppCompatActivity {
         });
 
         AppController.getInstance().addToRequestQueue(commentReq);
+
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case 1:
+                // edit
+                Log.i("contextMenu","Editar");
+                break;
+            case 2:
+                // delete
+                Log.i("contextMenu","Excluir");
+                break;
+        }
+        return super.onContextItemSelected(item);
+    }
+
+    public void deleteComment(String post_id, String user_id,String comment_id){
+        sp = getSharedPreferences(getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
+        Map<String,String> params = new HashMap<>();
+        params.put("id",comment_id);
+        params.put("user_id",user_id);
+        params.put("post_id",post_id);
+        CustomJSONObjectResquest commentReq = new CustomJSONObjectResquest(Request.Method.POST,DELCOMMENT_URL+"?token="+sp.getString("token",null),params, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    Log.i("response", response.getString("response"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                try {
+                    JSONObject json = new JSONObject( new String(error.networkResponse.data) );
+                    Log.i("Erro",json.getString("erro"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    String body="";
+                    if(error.networkResponse.data!=null) {
+                        try {
+                            body = new String(error.networkResponse.data,"UTF-8");
+                        } catch (UnsupportedEncodingException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                    Log.e("Erro","Corpo \n" + body.split("</head>")[1]);
+                }
+            }
+        });
+
+        AppController.getInstance().addToRequestQueue(commentReq);
+
 
     }
 

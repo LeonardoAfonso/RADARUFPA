@@ -29,6 +29,21 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/radar"
+                android:layout_margin="15dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textColor="@color/colorPrimary"
+                android:textSize="25dp"
+                android:layout_margin="15dp"
+                android:textAlignment="center"/>
+
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -63,24 +78,33 @@
 
             </android.support.design.widget.TextInputLayout>
 
-            <Button
-                android:id="@+id/email_sign_in_button"
-                style="?android:textAppearanceSmall"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/action_sign_in"
-                android:textStyle="bold" />
+         <LinearLayout
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:orientation="horizontal"
+             >
 
-            <Button
-                android:id="@+id/register"
-                style="?android:textAppearanceSmall"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/action_register"
-                android:textStyle="bold" />
+             <Button
+                 android:id="@+id/email_sign_in_button"
+                 style="?android:textAppearanceSmall"
+                 android:layout_width="0dp"
+                 android:layout_height="wrap_content"
+                 android:text="@string/action_sign_in"
+                 android:layout_weight="1"
+                 android:layout_marginRight="10dp"
+                 android:textStyle="bold" />
+
+             <Button
+                 android:id="@+id/register"
+                 style="?android:textAppearanceSmall"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="@string/action_register"
+                 android:textStyle="bold" />
+
+         </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
+
 </LinearLayout>

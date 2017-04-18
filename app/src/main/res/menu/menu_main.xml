@@ -9,8 +9,8 @@
         app:showAsAction="never" />
     <item
         android:id="@+id/action_logout"
-        android:orderInCategory="50"
+        android:orderInCategory="200"
         android:icon="@android:drawable/ic_lock_power_off"
-        android:showAsAction="ifRoom"
+        app:showAsAction="ifRoom"
         android:title="Logout" />
 </menu>

@@ -40,7 +40,7 @@ public class CommentListAdpter extends RecyclerView.Adapter<CommentListAdpter.Vi
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener{
         // each data item is just a string in this case
-
+        public CommentItem item;
         public TextView status;
         public TextView timestamp;
         public TextView name;
@@ -48,6 +48,7 @@ public class CommentListAdpter extends RecyclerView.Adapter<CommentListAdpter.Vi
 
         public ViewHolder(View itemView) {
             super(itemView);
+            item = new CommentItem();
             status = (TextView)itemView.findViewById(R.id.txtStatusMsg);
             timestamp = (TextView)itemView.findViewById(R.id.timestamp);
             name = (TextView)itemView.findViewById(R.id.name);
@@ -60,8 +61,11 @@ public class CommentListAdpter extends RecyclerView.Adapter<CommentListAdpter.Vi
         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
             menu.setHeaderTitle("Selecione ação");
             //aqui q eu tenho q por a condicao de verificar se o usuario e o comment sao o mesmo.
-            menu.add(0, 1, 1, "Editar"); //groupId, itemId, order, title
-            menu.add(0, 2, 2, "Excluir");
+            menu.add(0, 0, 0,  "Copiar");
+            if(item.getUser_id() == item.getPost_id()){
+                menu.add(0, 1, 1, "Editar"); //groupId, itemId, order, title
+                menu.add(0, 2, 2, "Excluir");
+            }
         }
     }
 
@@ -84,7 +88,12 @@ public class CommentListAdpter extends RecyclerView.Adapter<CommentListAdpter.Vi
             imageLoader = AppController.getInstance().getImageLoader();
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
+        holder.item.setId(commentItems.get(position).getId());
+        holder.item.setUser_id(commentItems.get(position).getUser_id());
+        holder.item.setPost_id(Integer.parseInt(sp.getString("id",null)));
+
         holder.status.setText(commentItems.get(position).getTexto());
+
         try {
             holder.timestamp.setText(DateUtils.getRelativeTimeSpanString(relativeTime(commentItems.get(position).getTimestamp()),System.currentTimeMillis(),DateUtils.SECOND_IN_MILLIS));
         } catch (ParseException e) {

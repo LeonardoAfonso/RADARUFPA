@@ -3,6 +3,8 @@ package bet.belleepoquetech.radarufpa;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -50,6 +52,9 @@ public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHo
         public FeedImageView feedImageView;
         public ImageView likeBtn;
         public ImageView commentBtn;
+        public CardView answerCard;
+        public TextView answerText;
+        public ImageView answerImg;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -60,6 +65,9 @@ public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHo
             feedImageView = (FeedImageView) itemView.findViewById(R.id.feedImage1);
             likeBtn = (ImageView) itemView.findViewById(R.id.likeBtn);
             commentBtn = (ImageView) itemView.findViewById(R.id.commentBtn);
+            answerCard = (CardView)itemView.findViewById(R.id.cardViewAnswer);
+            answerText = (TextView)itemView.findViewById(R.id.answerText);
+            answerImg = (ImageView) itemView.findViewById(R.id.answerImg);
         }
     }
 
@@ -103,6 +111,40 @@ public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHo
             e.printStackTrace();
         }
         holder.name.setText(mDataset.get(position).getName());
+
+        if(mDataset.get(position).getAnswer() == 1){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                holder.answerCard.setCardBackgroundColor(ctx.getColor(R.color.resolvido));
+            }else {
+                holder.answerCard.setCardBackgroundColor(ctx.getResources().getColor(R.color.resolvido));
+            }
+
+            holder.answerText.setText(ctx.getString(R.string.solved_answer));
+            //holder.answerImg.setImageResource(R.drawable.icon_solved);
+
+        }else if (mDataset.get(position).getAnswer() == 2){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                holder.answerCard.setCardBackgroundColor(ctx.getColor(R.color.solicitado));
+            }else {
+                holder.answerCard.setCardBackgroundColor(ctx.getResources().getColor(R.color.solicitado));
+            }
+
+            holder.answerText.setText(ctx.getString(R.string.listed_answer));
+            //holder.answerImg.setImageResource(R.drawable.icon_solved);
+
+        }else if (mDataset.get(position).getAnswer() == 3){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                holder.answerCard.setCardBackgroundColor(ctx.getColor(R.color.naoresolvido));
+            }else {
+                holder.answerCard.setCardBackgroundColor(ctx.getResources().getColor(R.color.naoresolvido));
+            }
+
+            holder.answerText.setText(ctx.getString(R.string.closed_answer));
+            //holder.answerImg.setImageResource(R.drawable.icon_solved);
+
+        }else{
+
+        }
 
         if(mDataset.get(position).getProfilePic().equals("") && mDataset.get(position).getProfilePic() == null){
             holder.profilePic.setImageResource(R.drawable.profile_pic);

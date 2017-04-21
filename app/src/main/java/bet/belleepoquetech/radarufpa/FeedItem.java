@@ -6,6 +6,8 @@ package bet.belleepoquetech.radarufpa;
 
 public class FeedItem {
     private int id;
+    private int answer;
+    private int typelike;
     private String name, status, image, profilePic, timeStamp, url;
     private boolean liked;
 
@@ -78,6 +80,22 @@ public class FeedItem {
 
     public void setLiked(boolean liked) {
         this.liked = liked;
+    }
+
+    public int getAnswer() {
+        return answer;
+    }
+
+    public void setAnswer(int answer) {
+        this.answer = answer;
+    }
+
+    public int getTypelike() {
+        return typelike;
+    }
+
+    public void setTypelike(int typelike) {
+        this.typelike = typelike;
     }
 
 }

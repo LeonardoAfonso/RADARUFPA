@@ -20,5 +20,7 @@
     <dimen name="feed_item_corner_radius">3dp</dimen>
     <dimen name="feed_item_border_width">1dp</dimen>
 
+    <dimen name="answer_textsize">15dp</dimen>
+
 </resources>
 

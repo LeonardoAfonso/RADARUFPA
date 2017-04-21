@@ -14,4 +14,9 @@
     <color name="link">#0a80d1</color>
     <color name="timestamp">#a0a3a7</color>
 
+    <color name="notawnswered">#a0a0a0</color>
+    <color name="solicitado">#efcf21</color>
+    <color name="resolvido">#23cf21</color>
+    <color name="naoresolvido">#df1131</color>
+
 </resources>

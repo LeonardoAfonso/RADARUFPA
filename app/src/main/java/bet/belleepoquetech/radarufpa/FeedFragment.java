@@ -155,7 +155,7 @@ public class FeedFragment extends Fragment {
                 String image = picture.isNull("url") ? null : picture.getString("url");
                 item.setImge("http://aedi.ufpa.br/~leonardo/radarufpa/storage/app/"+image);
                 item.setStatus(feedObj.getString("descricao"));
-                item.setAnswer(feedObj.getInt("answer"));
+                //item.setAnswer(feedObj.getInt("answer"));
 
                 if(user.getJSONObject("profile_picture").isNull("profile_pic_url")){
                     item.setProfilePic("");

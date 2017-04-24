@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,18 +21,27 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.NetworkImageView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ProfileFragment extends Fragment {
     private SharedPreferences mSharedPreferences;
     private String urlUserData = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/userdata";
+    private String urlUserPost = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/userpost";
+    private String urlImage = "http://aedi.ufpa.br/~leonardo/radarufpa/storage/app/";
+    private GridView grid;
+    private String token;
+    private List<Posts> posts;
+    ProfileGridAdapter adapter;
 
 
     public static ProfileFragment newInstance() {
@@ -47,6 +57,9 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        mSharedPreferences = getContext().getSharedPreferences(getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
+        Log.i("token",mSharedPreferences.getString("token",null));
+        token = mSharedPreferences.getString("token",null);
 
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
         final NetworkImageView circleView  = (NetworkImageView)rootView.findViewById(R.id.circleView);
@@ -59,10 +72,12 @@ public class ProfileFragment extends Fragment {
         final TextView txtNome = (TextView)rootView.findViewById(R.id.txtNome);
         final TextView txtTipo = (TextView)rootView.findViewById(R.id.txtCurso);
         final TextView txtNasc = (TextView)rootView.findViewById(R.id.txtNasc);
+        grid = (GridView)rootView.findViewById(R.id.gridview);
+        posts = new ArrayList<>();
+        getUserPosts();
+        adapter = new ProfileGridAdapter(posts,getContext());
+        grid.setAdapter(adapter);
 
-        mSharedPreferences = getContext().getSharedPreferences(getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
-        Log.i("token",mSharedPreferences.getString("token",null));
-        final String token = mSharedPreferences.getString("token",null);
 
         Map<String,String>params = new HashMap<>();
         //params.put("user","usurario");
@@ -126,6 +141,46 @@ public class ProfileFragment extends Fragment {
 
         AppController.getInstance().addToRequestQueue(request);
 
+
+
         return rootView ;
+
     }
+
+    public void getUserPosts(){
+       final CustomJSONObjectResquest req  = new CustomJSONObjectResquest(urlUserPost + "?token=" + token, null, new Response.Listener<JSONObject>() {
+           @Override
+           public void onResponse(JSONObject response) {
+               Log.i("response", String.valueOf(response));
+               try {
+                   adapter.clearData();
+
+                   JSONArray json = response.getJSONArray("posts");
+
+                   for(int i=0;i<json.length();i++){
+                        Posts post = new Posts();
+                        post.setId(json.getJSONObject(i).getInt("id"));
+                        post.setUser_id(json.getJSONObject(i).getInt("user_id"));
+                        post.setImgUrl(urlImage+json.getJSONObject(i).getJSONObject("picture").getString("url"));
+                        posts.add(post);
+                   }
+
+                   adapter.notifyDataSetChanged();
+
+               } catch (JSONException e) {
+                   e.printStackTrace();
+               }
+
+
+           }
+       }, new Response.ErrorListener() {
+           @Override
+           public void onErrorResponse(VolleyError error) {
+                Log.i("erro","erro");
+           }
+       });
+
+        AppController.getInstance().addToRequestQueue(req);
+    }
+
 }

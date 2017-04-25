@@ -37,6 +37,7 @@ public class FeedFragment extends Fragment {
     private Cache cache;
     private Cache.Entry entry;
     private String URL_FEED = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/feed";
+    private String URL_IMAGE ="http://aedi.ufpa.br/~leonardo/radarufpa/storage/app/";
     private SwipeRefreshLayout swipeRefreshLayout;
     private LinearLayoutManager mLayoutManager;
     private SharedPreferences sp;
@@ -153,7 +154,7 @@ public class FeedFragment extends Fragment {
                 JSONObject picture = feedObj.getJSONObject("picture");
 
                 String image = picture.isNull("url") ? null : picture.getString("url");
-                item.setImge("http://aedi.ufpa.br/~leonardo/radarufpa/storage/app/"+image);
+                item.setImge(URL_IMAGE+image);
                 item.setStatus(feedObj.getString("descricao"));
                 //item.setAnswer(feedObj.getInt("answer"));
 

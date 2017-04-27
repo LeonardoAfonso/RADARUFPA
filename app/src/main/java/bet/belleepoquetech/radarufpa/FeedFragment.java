@@ -12,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -84,6 +85,21 @@ public class FeedFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case 1:
+                // edit
+                Log.i("contextMenu","Editar");
+                break;
+            case 2:
+                // delete
+                Log.i("contextMenu","Excluir");
+                break;
+        }
+        return super.onContextItemSelected(item);
+    }
+
     private void getFeed(){
         // We first check for cached request
         cache = AppController.getInstance().getRequestQueue().getCache();
@@ -149,6 +165,7 @@ public class FeedFragment extends Fragment {
                 item.setLiked(hasLiked(like,sp.getString("id",null),feedObj.getInt("id")));
 
                 item.setName(user.getString("name"));
+                item.setUser_id(user.getInt("id"));
 
                 // Image might be null sometimes
                 JSONObject picture = feedObj.getJSONObject("picture");

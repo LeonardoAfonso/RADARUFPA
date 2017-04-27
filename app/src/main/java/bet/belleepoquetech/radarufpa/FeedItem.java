@@ -5,7 +5,7 @@ package bet.belleepoquetech.radarufpa;
  */
 
 public class FeedItem {
-    private int id;
+    private int id,user_id;
     private int answer;
     private int typelike;
     private String name, status, image, profilePic, timeStamp, url;
@@ -98,4 +98,11 @@ public class FeedItem {
         this.typelike = typelike;
     }
 
+    public int getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(int user_id) {
+        this.user_id = user_id;
+    }
 }

@@ -52,6 +52,7 @@
                     android:textColor="@color/timestamp"
                     android:textSize="@dimen/feed_item_timestamp" />
             </LinearLayout>
+
         </LinearLayout>
 
         <TextView
@@ -134,6 +135,15 @@
                 android:src="@drawable/icon_comment"
                 android:layout_marginTop="10dp"
                 android:layout_marginLeft="15dp"/>
+
+            <ImageView
+                android:id="@+id/moreBtn"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="15dp"
+                android:src="@android:drawable/ic_menu_more"
+                />
         </LinearLayout>
 
     </LinearLayout>

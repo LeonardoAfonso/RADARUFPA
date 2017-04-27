@@ -45,9 +45,11 @@ public class CommentListAdpter extends RecyclerView.Adapter<CommentListAdpter.Vi
         public TextView timestamp;
         public TextView name;
         public NetworkImageView profilePic;
+        public SharedPreferences sp;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            sp = itemView.getContext().getSharedPreferences(itemView.getContext().getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
             item = new CommentItem();
             status = (TextView)itemView.findViewById(R.id.txtStatusMsg);
             timestamp = (TextView)itemView.findViewById(R.id.timestamp);
@@ -62,7 +64,7 @@ public class CommentListAdpter extends RecyclerView.Adapter<CommentListAdpter.Vi
             menu.setHeaderTitle("Selecione ação");
             //aqui q eu tenho q por a condicao de verificar se o usuario e o comment sao o mesmo.
             menu.add(0, 0, 0,  "Copiar");
-            if(item.getUser_id() == item.getPost_id()){
+            if(item.getUser_id() ==Integer.parseInt(sp.getString("id",null))){
                 menu.add(0, 1, 1, "Editar"); //groupId, itemId, order, title
                 menu.add(0, 2, 2, "Excluir");
             }
@@ -88,10 +90,9 @@ public class CommentListAdpter extends RecyclerView.Adapter<CommentListAdpter.Vi
             imageLoader = AppController.getInstance().getImageLoader();
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.item.setId(commentItems.get(position).getId());
-        holder.item.setUser_id(commentItems.get(position).getUser_id());
-        holder.item.setPost_id(Integer.parseInt(sp.getString("id",null)));
 
+
+        holder.item = commentItems.get(position);
         holder.status.setText(commentItems.get(position).getTexto());
 
         try {

@@ -1,16 +1,22 @@
 package bet.belleepoquetech.radarufpa;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,7 +48,7 @@ public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHo
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener{
         // each data item is just a string in this case
 
         public TextView status;
@@ -55,9 +61,14 @@ public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHo
         public CardView answerCard;
         public TextView answerText;
         public ImageView answerImg;
+        public FeedItem feedItem;
+        public ImageView moreBtn;
+        public SharedPreferences sp;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            sp = itemView.getContext().getSharedPreferences(itemView.getContext().getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
+            feedItem = new FeedItem();
             status = (TextView)itemView.findViewById(R.id.txtStatusMsg);
             timestamp = (TextView)itemView.findViewById(R.id.timestamp);
             name = (TextView)itemView.findViewById(R.id.name);
@@ -68,8 +79,24 @@ public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHo
             answerCard = (CardView)itemView.findViewById(R.id.cardViewAnswer);
             answerText = (TextView)itemView.findViewById(R.id.answerText);
             answerImg = (ImageView) itemView.findViewById(R.id.answerImg);
+            moreBtn = (ImageView) itemView.findViewById(R.id.moreBtn);
+            moreBtn.setOnCreateContextMenuListener(this);
+        }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+            menu.setHeaderTitle("Selecione ação");
+            //aqui q eu tenho q por a condicao de verificar se o usuario e o post sao o mesmo.
+
+            if(feedItem.getUser_id() == Integer.parseInt(sp.getString("id",null))){
+                menu.add(0, 1, 1, "Editar"); //groupId, itemId, order, title
+                menu.add(0, 2, 2, "Excluir");
+            }else{
+                menu.add(0, 0, 0,  "Denunciar");
+            }
         }
     }
+
 
     private List<FeedItem> mDataset;
     private Context ctx;
@@ -103,6 +130,7 @@ public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHo
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
 
+        holder.feedItem = mDataset.get(position);
 
         holder.status.setText(mDataset.get(position).getStatus());
         try {

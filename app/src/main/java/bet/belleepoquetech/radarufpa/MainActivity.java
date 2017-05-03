@@ -224,4 +224,9 @@ public class MainActivity extends AppCompatActivity {
         builder.create().show();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
 }

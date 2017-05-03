@@ -1,17 +1,20 @@
 package bet.belleepoquetech.radarufpa;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -57,6 +60,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,6 +69,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -81,13 +87,13 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
     private Animation fab_open, fab_close, rotate_forward, rotate_backward;
     private SharedPreferences mSharedPreferences;
     private Dialog view;
+    private Uri mCropImageUri;
     static final int REQUEST_TAKE_PHOTO = 1;
     private ImageView img;
     private Spinner pontoSpn;
     String mCurrentPhotoPath;
     private Uri mcurrentPhotoUri;
     private String UPLOAD_URL = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/publication";
-
 
     public static MapaFragment newInstance() {
         MapaFragment fragment = new MapaFragment();
@@ -136,7 +142,6 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
                 marker.remove();
                 fab3.startAnimation(fab_close);
                 fab4.startAnimation(fab_close);
-                //fab.startAnimation(fab_close);
                 fab2.hide();
                 isFabOpen = false;
             }
@@ -169,6 +174,12 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         });
     }
 
+    public void customAddMarker(LatLng latlng, String title, String snippet) {
+        MarkerOptions options = new MarkerOptions();
+        options.position(latlng).title(title).snippet(snippet);
+        marker = map.addMarker(options);
+    }
+
     @Override
     public void onMapClick(LatLng latLng) {
         if (marker != null) {
@@ -178,80 +189,6 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         fab2.show();
         Log.i("FAB 2", String.valueOf(fab2.getVisibility()));
         customAddMarker(new LatLng(latLng.latitude, latLng.longitude), "", "");
-    }
-
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getContext().getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-                Log.i("OK", "criou foto");
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-                Log.i("Erro", "Erro ao tirar foto");
-
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                mcurrentPhotoUri = FileProvider.getUriForFile(getContext(), "bet.belleepoquetech.radarufpa.fileprovider", photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mcurrentPhotoUri);
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-            }
-
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode != Activity.RESULT_CANCELED) {
-            //if (data != null) {
-                if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
-                    File file = new File(mCurrentPhotoPath);
-                    galleryAddPic();
-                    picDialog(Uri.fromFile(file));
-
-                    Log.i("Foto","Retornou a foto");
-                }
-                else{
-                    Log.i("Foto","requestcode e resultcode deu diferente");
-                }
-           // }else{
-            //    Log.i("foto","data eh null");
-            //}
-        }else{
-            Log.i("foto","resultCode eh igual a Result_canceled");
-        }
-    }
-
-    public void customAddMarker(LatLng latlng, String title, String snippet) {
-        MarkerOptions options = new MarkerOptions();
-        options.position(latlng).title(title).snippet(snippet);
-        marker = map.addMarker(options);
-    }
-
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "RADAR_PIC" + timeStamp + "_";
-        File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
-
-    private void galleryAddPic() {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(mCurrentPhotoPath);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(contentUri);
-        getActivity().sendBroadcast(mediaScanIntent);
     }
 
     public void animateFAB() {
@@ -272,6 +209,41 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         }
     }
 
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getContext().getPackageManager()) != null) {
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+                Log.i("OK", "criou foto");
+            } catch (IOException ex) {
+                Log.i("Erro", "Erro ao tirar foto");
+            }
+            if (photoFile != null) {
+                mcurrentPhotoUri = FileProvider.getUriForFile(getContext(), "bet.belleepoquetech.radarufpa.fileprovider", photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mcurrentPhotoUri);
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            }
+
+        }
+    }
+
+
+    public void cropImage(File file){
+        CropImage.activity(Uri.fromFile(file)).setGuidelines(CropImageView.Guidelines.ON).setMinCropResultSize(1280,720)
+                .setMaxCropResultSize(1280,720).start(getActivity());
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName, ".jpg", storageDir);
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
     public void picDialog(final Uri imagem) {
         view = new Dialog(getContext());
         view.setContentView(R.layout.pic_dialog_layout);
@@ -283,7 +255,7 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         view.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
         img = (ImageView) view.findViewById(R.id.imageView);
-        setPic();
+        //setPic();
         img.setImageURI(imagem);
 
         Button btn = (Button) view.findViewById(R.id.btnCancelar);
@@ -383,30 +355,28 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         view.dismiss();
     }
 
-
-    private void setPic() {
-        // Get the dimensions of the View
-        int targetW = 720;
-        int targetH = 480;
-
-        // Get the dimensions of the bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-        // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-
-        // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        img.setImageBitmap(bitmap);
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode,resultCode,data);
+        Log.i("onActivityResult","Entrou");
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == getActivity().RESULT_OK) {
+            Log.i("Foto", "retornou a foto");
+            File file = new File(mCurrentPhotoPath);
+            //cropImage(file);
+            picDialog(Uri.fromFile(file));
+        }
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == getActivity().RESULT_OK) {
+                Uri resultUri = result.getUri();
+                picDialog(resultUri);
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+            }
+        }
+        Log.i("onActivityResult","saiu");
     }
+
 
 }
 

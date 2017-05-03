@@ -39,6 +39,12 @@ public class ProfileFragment extends Fragment {
     private String urlUserPost = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/userpost";
     private String urlImage = "http://aedi.ufpa.br/~leonardo/radarufpa/storage/app/";
     private GridView grid;
+    private TextView txtNome;
+    private TextView txtTipo;
+    private TextView txtNasc;
+    private TextView txtEmail;
+    private TextView txtPost;
+    private TextView txtSolvedPost;
     private String token;
     private List<Posts> posts;
     ProfileGridAdapter adapter;
@@ -69,9 +75,12 @@ public class ProfileFragment extends Fragment {
         circleView.setDefaultImageResId(R.drawable.profile_pic);
         circleView.setErrorImageResId(R.drawable.profile_pic);
 
-        final TextView txtNome = (TextView)rootView.findViewById(R.id.txtNome);
-        final TextView txtTipo = (TextView)rootView.findViewById(R.id.txtCurso);
-        final TextView txtNasc = (TextView)rootView.findViewById(R.id.txtNasc);
+        txtNome = (TextView)rootView.findViewById(R.id.txtNome);
+        txtTipo = (TextView)rootView.findViewById(R.id.txtCurso);
+        txtNasc = (TextView)rootView.findViewById(R.id.txtNasc);
+        txtEmail = (TextView)rootView.findViewById(R.id.txtEmail);
+        txtPost = (TextView)rootView.findViewById(R.id.txtPost);
+        txtSolvedPost = (TextView)rootView.findViewById(R.id.txtSolvedPost);
         grid = (GridView)rootView.findViewById(R.id.gridview);
         posts = new ArrayList<>();
         getUserPosts();
@@ -103,6 +112,7 @@ public class ProfileFragment extends Fragment {
                     }
                     txtNome.setText(response.getString("name"));
                     txtTipo.setText(response.getString("type"));
+                    txtEmail.setText(response.getString("email"));
                     SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd");
                     SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
                     try {
@@ -156,7 +166,7 @@ public class ProfileFragment extends Fragment {
                    adapter.clearData();
 
                    JSONArray json = response.getJSONArray("posts");
-
+                   txtPost.setText(String.valueOf(json.length()));
                    for(int i=0;i<json.length();i++){
                         Posts post = new Posts();
                         post.setId(json.getJSONObject(i).getInt("id"));

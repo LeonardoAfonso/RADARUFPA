@@ -228,7 +228,6 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         }
     }
 
-
     public void cropImage(File file){
         CropImage.activity(Uri.fromFile(file)).setGuidelines(CropImageView.Guidelines.ON).setMinCropResultSize(1280,720)
                 .setMaxCropResultSize(1280,720).start(getActivity());
@@ -253,9 +252,7 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
 
         view.getWindow().setLayout(device_TotalWidth*80/100, device_TotalHeight*70/100);
         view.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
         img = (ImageView) view.findViewById(R.id.imageView);
-        //setPic();
         img.setImageURI(imagem);
 
         Button btn = (Button) view.findViewById(R.id.btnCancelar);
@@ -276,14 +273,14 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         btnSalvar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                doPublication(edtDesc.getText().toString(),String.valueOf(marker.getPosition().latitude) +":"+String.valueOf(marker.getPosition().longitude));
+                doPublication(edtDesc.getText().toString(),String.valueOf(marker.getPosition().latitude) +":"+String.valueOf(marker.getPosition().longitude), pontoSpn.getSelectedItem().toString());
             }
         });
 
         view.show();
     }
 
-    private void doPublication(final String descricao, final String latlong) {
+    private void doPublication(final String descricao, final String latlong, final String tipo) {
         VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest(Request.Method.POST, UPLOAD_URL+"?token="+mSharedPreferences.getString("token",null), new Response.Listener<NetworkResponse>() {
             @Override
             public void onResponse(NetworkResponse response) {
@@ -294,7 +291,6 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
                     String message = result.getString("message");
 
                     if (status.equals(1)) {
-                        // tell everybody you have succed upload image and post strings
                         Log.i("Message", message);
                     } else {
                         Log.i("Unexpected", message);
@@ -302,7 +298,6 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             }
         }, new Response.ErrorListener() {
             @Override
@@ -323,30 +318,24 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
                 error.printStackTrace();
             }
         }) {
-
             @Override
             public Map<String,String> getHeaders(){
                 Map<String,String> headers = new HashMap<>();
                 headers.put("Authorization:","Bearer "+mSharedPreferences.getString("token",null));
                 return headers;
             }
-
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
                 params.put("descricao", descricao);
                 params.put("latlong", latlong);
+                params.put("tipo", tipo);
                 return params;
             }
-
             @Override
             protected Map<String, DataPart> getByteData() {
                 Map<String, DataPart> params = new HashMap<>();
-                // file name could found file base or direct access from real path
-                // for now just get bitmap data from ImageView
                 params.put("public_pic", new DataPart("file_avatar.jpg", AppHelper.getFileDataFromUri(getContext(),mcurrentPhotoUri), "image/jpeg"));
-                //params.put("cover", new DataPart("file_cover.jpg", AppHelper.getFileDataFromDrawable(getContext(), mCoverImage.getDrawable()), "image/jpeg"));
-
                 return params;
             }
         };

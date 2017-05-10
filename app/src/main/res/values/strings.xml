@@ -29,7 +29,7 @@
     <string name="prompt_birth">Data de Nascimento</string>
     <string name="prompt_tipo">Tipo</string>
     <string name="action_sign_in">Entrar</string>
-    <string name="action_register">Clique aqui para se registrar</string>
+    <string name="action_register">Registre-se Aqui</string>
     <string name="action_sign_in_short">Entrar</string>
     <string name="error_invalid_email">Este email é inválido</string>
     <string name="error_invalid_password">Esta senha é muito curta, use no mínimo 6 caracteres</string>

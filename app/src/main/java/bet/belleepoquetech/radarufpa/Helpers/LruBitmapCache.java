@@ -1,4 +1,4 @@
-package bet.belleepoquetech.radarufpa;
+package bet.belleepoquetech.radarufpa.helpers;
 
 /**
  * Created by Leonardo Afonso on 2/16/2017.

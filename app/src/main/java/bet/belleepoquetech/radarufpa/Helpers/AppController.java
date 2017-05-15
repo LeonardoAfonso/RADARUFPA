@@ -1,11 +1,10 @@
-package bet.belleepoquetech.radarufpa;
+package bet.belleepoquetech.radarufpa.helpers;
 
 /**
  * Created by Leonardo Afonso on 2/16/2017.
  */
 
 
-import bet.belleepoquetech.radarufpa.LruBitmapCache;
 import android.app.Application;
 import android.text.TextUtils;
 import com.android.volley.Request;

@@ -1,18 +1,19 @@
-package bet.belleepoquetech.radarufpa;
+package bet.belleepoquetech.radarufpa.adapters;
 
-import android.app.Activity;
 import android.content.Context;
-import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
 
 import java.util.List;
+
+import bet.belleepoquetech.radarufpa.helpers.AppController;
+import bet.belleepoquetech.radarufpa.dao.PostItem;
+import bet.belleepoquetech.radarufpa.helpers.FeedImageView;
+import bet.belleepoquetech.radarufpa.R;
 
 /**
  * Created by AEDI on 24/04/17.
@@ -22,11 +23,11 @@ public class ProfileGridAdapter extends BaseAdapter{
     ImageLoader imageLoader = AppController.getInstance().getImageLoader();
     private LayoutInflater inflater;
     private Context context;
-    private List<Posts> posts;
+    private List<PostItem> posts;
 
 
 
-    public ProfileGridAdapter(List<Posts> post, Context context){
+    public ProfileGridAdapter(List<PostItem> post, Context context){
         this.posts = post;
         this.context = context;
     }

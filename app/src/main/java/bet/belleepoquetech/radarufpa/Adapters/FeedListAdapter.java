@@ -1,22 +1,17 @@
-package bet.belleepoquetech.radarufpa;
+package bet.belleepoquetech.radarufpa.adapters;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,6 +33,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+
+import bet.belleepoquetech.radarufpa.helpers.AppController;
+import bet.belleepoquetech.radarufpa.helpers.CustomJSONObjectResquest;
+import bet.belleepoquetech.radarufpa.dao.FeedItem;
+import bet.belleepoquetech.radarufpa.helpers.FeedImageView;
+import bet.belleepoquetech.radarufpa.R;
+import bet.belleepoquetech.radarufpa.activities.CommentActivity;
 
 /**
  * Created by AEDI on 10/04/17.

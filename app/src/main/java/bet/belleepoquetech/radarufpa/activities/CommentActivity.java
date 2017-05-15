@@ -1,4 +1,4 @@
-package bet.belleepoquetech.radarufpa;
+package bet.belleepoquetech.radarufpa.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -28,6 +28,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import bet.belleepoquetech.radarufpa.helpers.AppController;
+import bet.belleepoquetech.radarufpa.dao.CommentItem;
+import bet.belleepoquetech.radarufpa.adapters.CommentListAdpter;
+import bet.belleepoquetech.radarufpa.helpers.CustomJSONObjectResquest;
+import bet.belleepoquetech.radarufpa.R;
 
 public class CommentActivity extends AppCompatActivity {
     private EditText edtComment;

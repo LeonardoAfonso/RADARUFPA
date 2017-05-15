@@ -1,4 +1,4 @@
-package bet.belleepoquetech.radarufpa;
+package bet.belleepoquetech.radarufpa.adapters;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -18,6 +18,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+
+import bet.belleepoquetech.radarufpa.helpers.AppController;
+import bet.belleepoquetech.radarufpa.dao.CommentItem;
+import bet.belleepoquetech.radarufpa.R;
 
 /**
  * Created by AEDI on 06/04/17.

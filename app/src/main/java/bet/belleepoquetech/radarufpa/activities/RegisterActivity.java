@@ -1,4 +1,4 @@
-package bet.belleepoquetech.radarufpa;
+package bet.belleepoquetech.radarufpa.activities;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -6,7 +6,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -53,6 +52,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import bet.belleepoquetech.radarufpa.helpers.AppController;
+import bet.belleepoquetech.radarufpa.helpers.AppHelper;
+import bet.belleepoquetech.radarufpa.helpers.CustomJSONObjectResquest;
+import bet.belleepoquetech.radarufpa.R;
+import bet.belleepoquetech.radarufpa.helpers.VolleyMultipartRequest;
 
 public class RegisterActivity extends AppCompatActivity  implements DatePickerDialog.OnDateSetListener {
     private View progressBar;

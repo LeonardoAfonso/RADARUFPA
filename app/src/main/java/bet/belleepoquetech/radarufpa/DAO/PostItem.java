@@ -1,10 +1,10 @@
-package bet.belleepoquetech.radarufpa;
+package bet.belleepoquetech.radarufpa.dao;
 
 /**
  * Created by AEDI on 24/04/17.
  */
 
-public class Posts {
+public class PostItem {
 
     private int id;
     private String imgUrl;
@@ -14,9 +14,9 @@ public class Posts {
     private int seen;
     private int unknown;
 
-    public Posts(){}
+    public PostItem(){}
 
-    public Posts(int id, String answer, int user_id, int affected, int seen, int unknown){
+    public PostItem(int id, String answer, int user_id, int affected, int seen, int unknown){
         super();
         this.id = id;
         this.answer = answer;

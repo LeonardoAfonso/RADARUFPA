@@ -5,7 +5,7 @@
     android:background="@color/white"
     android:padding="5dp">
 
-    <bet.belleepoquetech.radarufpa.FeedImageView
+    <bet.belleepoquetech.radarufpa.helpers.FeedImageView
         android:id="@+id/postImg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

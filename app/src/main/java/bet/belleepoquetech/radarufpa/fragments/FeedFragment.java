@@ -1,4 +1,4 @@
-package bet.belleepoquetech.radarufpa;
+package bet.belleepoquetech.radarufpa.fragments;
 
 
 import android.content.Context;
@@ -28,6 +28,13 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+
+import bet.belleepoquetech.radarufpa.helpers.AppController;
+import bet.belleepoquetech.radarufpa.helpers.CustomJSONObjectResquest;
+import bet.belleepoquetech.radarufpa.dao.FeedItem;
+import bet.belleepoquetech.radarufpa.adapters.FeedListAdapter;
+import bet.belleepoquetech.radarufpa.R;
+import bet.belleepoquetech.radarufpa.activities.MainActivity;
 
 
 public class FeedFragment extends Fragment {

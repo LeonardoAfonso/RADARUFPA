@@ -1,4 +1,4 @@
-package bet.belleepoquetech.radarufpa;
+package bet.belleepoquetech.radarufpa.fragments;
 
 
 import android.os.Bundle;
@@ -14,6 +14,7 @@ import android.widget.ListView;
 
 import java.net.URISyntaxException;
 
+import bet.belleepoquetech.radarufpa.R;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;

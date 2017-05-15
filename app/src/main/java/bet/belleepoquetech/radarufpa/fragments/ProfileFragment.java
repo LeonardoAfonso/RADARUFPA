@@ -1,4 +1,4 @@
-package bet.belleepoquetech.radarufpa;
+package bet.belleepoquetech.radarufpa.fragments;
 
 
 import android.content.Context;
@@ -12,11 +12,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.NetworkImageView;
@@ -33,6 +31,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import bet.belleepoquetech.radarufpa.helpers.AppController;
+import bet.belleepoquetech.radarufpa.helpers.CustomJSONObjectResquest;
+import bet.belleepoquetech.radarufpa.helpers.ImageConverter;
+import bet.belleepoquetech.radarufpa.dao.PostItem;
+import bet.belleepoquetech.radarufpa.adapters.ProfileGridAdapter;
+import bet.belleepoquetech.radarufpa.R;
+
 public class ProfileFragment extends Fragment {
     private SharedPreferences mSharedPreferences;
     private String urlUserData = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/userdata";
@@ -46,7 +51,7 @@ public class ProfileFragment extends Fragment {
     private TextView txtPost;
     private TextView txtSolvedPost;
     private String token;
-    private List<Posts> posts;
+    private List<PostItem> posts;
     ProfileGridAdapter adapter;
 
 
@@ -108,7 +113,7 @@ public class ProfileFragment extends Fragment {
                 try {
                     JSONObject j = response.getJSONObject("profile_picture");
                     if(!(j.getString("profile_pic_url").equals("null") || j.getString("profile_pic_url") == null)){
-                        circleView.setImageUrl("http://aedi.ufpa.br/~leonardo/radarufpa/storage/app/"+j.getString("profile_pic_url"),AppController.getInstance().getImageLoader());
+                        circleView.setImageUrl("http://aedi.ufpa.br/~leonardo/radarufpa/storage/app/"+j.getString("profile_pic_url"), AppController.getInstance().getImageLoader());
                     }
                     txtNome.setText(response.getString("name"));
                     txtTipo.setText(response.getString("type"));
@@ -168,7 +173,7 @@ public class ProfileFragment extends Fragment {
                    JSONArray json = response.getJSONArray("posts");
                    txtPost.setText(String.valueOf(json.length()));
                    for(int i=0;i<json.length();i++){
-                        Posts post = new Posts();
+                        PostItem post = new PostItem();
                         post.setId(json.getJSONObject(i).getInt("id"));
                         post.setUser_id(json.getJSONObject(i).getInt("user_id"));
                         post.setImgUrl(urlImage+json.getJSONObject(i).getJSONObject("picture").getString("url"));

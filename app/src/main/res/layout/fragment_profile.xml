@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="bet.belleepoquetech.radarufpa.ProfileFragment">
+    tools:context="bet.belleepoquetech.radarufpa.fragments.ProfileFragment">
 
     <com.android.volley.toolbox.NetworkImageView
         android:layout_width="140dp"

@@ -1,4 +1,4 @@
-package bet.belleepoquetech.radarufpa;
+package bet.belleepoquetech.radarufpa.helpers;
 
 /**
  * Created by AEDI on 03/04/17.

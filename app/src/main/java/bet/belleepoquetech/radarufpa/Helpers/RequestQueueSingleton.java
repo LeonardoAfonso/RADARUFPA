@@ -1,4 +1,4 @@
-package bet.belleepoquetech.radarufpa;
+package bet.belleepoquetech.radarufpa.helpers;
 
 import android.content.Context;
 import android.graphics.Bitmap;

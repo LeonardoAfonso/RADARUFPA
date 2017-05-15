@@ -1,12 +1,8 @@
-package bet.belleepoquetech.radarufpa;
+package bet.belleepoquetech.radarufpa.activities;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.provider.Settings;
 import android.support.design.widget.TabLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.multidex.MultiDex;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -17,14 +13,15 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 
 import android.view.WindowManager;
-import android.widget.TextView;
+
+import bet.belleepoquetech.radarufpa.fragments.FeedFragment;
+import bet.belleepoquetech.radarufpa.fragments.MapaFragment;
+import bet.belleepoquetech.radarufpa.fragments.ProfileFragment;
+import bet.belleepoquetech.radarufpa.R;
 
 public class MainActivity extends AppCompatActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;

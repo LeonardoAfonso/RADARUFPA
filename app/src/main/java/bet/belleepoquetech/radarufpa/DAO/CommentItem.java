@@ -1,4 +1,4 @@
-package bet.belleepoquetech.radarufpa;
+package bet.belleepoquetech.radarufpa.dao;
 
 /**
  * Created by AEDI on 06/04/17.
@@ -10,7 +10,7 @@ public class CommentItem {
     private int user_id;
     private String texto, name, profilePic, timestamp;
 
-    CommentItem(){}
+    public CommentItem(){}
 
     public CommentItem(int id, int post_id,int user_id, String texto, String name, String profilePic, String timestamp) {
         super();

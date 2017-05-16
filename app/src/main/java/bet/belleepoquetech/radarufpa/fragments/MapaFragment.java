@@ -106,7 +106,6 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
         rotate_forward = AnimationUtils.loadAnimation(getContext(), R.anim.rotate_foward);
         rotate_backward = AnimationUtils.loadAnimation(getContext(), R.anim.rotate_backward);
 
-
         fab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -178,14 +177,17 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback, Google
 
     public void animateFAB() {
         if (isFabOpen) {
-            fab2.startAnimation(rotate_backward);
+            //fab2.startAnimation(rotate_backward);
+            marker.remove();
+            fab2.hide();
             fab3.startAnimation(fab_close);
             fab4.startAnimation(fab_close);
             fab3.setClickable(false);
             fab4.setClickable(false);
             isFabOpen = false;
         } else {
-            fab2.startAnimation(rotate_forward);
+            //fab2.startAnimation(rotate_forward);
+            isFabOpen = false;
             fab3.startAnimation(fab_open);
             fab4.startAnimation(fab_open);
             fab3.setClickable(true);

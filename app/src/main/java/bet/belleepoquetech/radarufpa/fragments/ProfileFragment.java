@@ -1,6 +1,7 @@
 package bet.belleepoquetech.radarufpa.fragments;
 
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridLayout;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -44,6 +46,7 @@ public class ProfileFragment extends Fragment {
     private String urlUserPost = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/userpost";
     private String urlImage = "http://aedi.ufpa.br/~leonardo/radarufpa/storage/app/";
     private GridView grid;
+    private GridLayout gridLayout;
     private TextView txtNome;
     private TextView txtTipo;
     private TextView txtNasc;
@@ -89,8 +92,20 @@ public class ProfileFragment extends Fragment {
         grid = (GridView)rootView.findViewById(R.id.gridview);
         posts = new ArrayList<>();
         getUserPosts();
+        gridLayout = (GridLayout) rootView.findViewById(R.id.gridlayout);
         adapter = new ProfileGridAdapter(posts,getContext());
         grid.setAdapter(adapter);
+
+        gridLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Dialog d = new Dialog(getContext());
+                d.setTitle("Significado dos Icones");
+                d.setContentView(R.layout.icon_explanation_dialog_layout);
+                d.setCancelable(true);
+                d.show();
+            }
+        });
 
 
         Map<String,String>params = new HashMap<>();

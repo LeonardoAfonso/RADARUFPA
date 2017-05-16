@@ -39,24 +39,6 @@
                    android:src="@drawable/profile_pic"
                    android:layout_margin="10dp" />
 
-                <ImageView
-                    android:id="@+id/galeria"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@android:drawable/ic_menu_gallery"
-                    android:tint="@color/colorPrimary"
-                    android:layout_toEndOf="@+id/profile_pic"
-                    android:layout_alignTop="@+id/profile_pic" />
-
-               <TextView
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:layout_toEndOf="@+id/galeria"
-                   android:layout_alignBottom="@id/galeria"
-                   android:text="Clique aqui para selecionar uma foto da galeria"/>
-
-
-
                <ImageView
                    android:id="@+id/camera"
                    android:layout_width="wrap_content"
@@ -136,7 +118,6 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_birth"
                     android:inputType="date"
-                    android:focusable="false"
                     android:maxLines="1"
                     android:singleLine="true" />
 

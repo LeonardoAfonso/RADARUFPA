@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +14,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -64,7 +66,6 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
     private View registerView;
     private ImageView profile_pic;
     private ImageView camera;
-    private ImageView gallery;
     private Button btnRegister;
     private  EditText edtNome;
     private  EditText edtEmail;
@@ -81,10 +82,10 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
     private SimpleDateFormat df;
     private SimpleDateFormat myFormat;
     static final int REQUEST_TAKE_PHOTO = 1;
-    static final int PICK_FROM_FILE = 2;
     String mCurrentPhotoPath;
     private Uri mcurrentPhotoUri;
     File photoFile = null;
+    private boolean cancel = false;
     private String urlRegister = "http://aedi.ufpa.br/~leonardo/radarufpa/index.php/api/register";
 
     @Override
@@ -102,19 +103,6 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
         progressBar = findViewById(R.id.register_progress);
         profile_pic = (ImageView) findViewById(R.id.profile_pic);
         camera = (ImageView)findViewById(R.id.camera);
-        gallery = (ImageView)findViewById(R.id.galeria);
-
-        gallery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivityForResult(
-                        Intent.createChooser(
-                                new Intent(Intent.ACTION_GET_CONTENT)
-                                        .setType("image/*"), "Choose an image"),
-                        PICK_FROM_FILE);
-            }
-        });
-
         camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -150,11 +138,6 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
 
     }
 
-    public EditText getEdtNasc() {
-        return edtNasc;
-    }
-
-
     private String md5(String in) {
         MessageDigest digest;
         try {
@@ -179,8 +162,6 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                 edtEmail.setError(null);
                 edtSenha.setError(null);
                 edtNasc.setError(null);
-
-                boolean cancel = false;
 
                 name = edtNome.getText().toString();
                 email = edtEmail.getText().toString();
@@ -221,18 +202,38 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                     cancel = true;
                 }
 
-                if(!cancel){
-                    showProgress(true);
-                    if(photoFile == null){
-                        registerWithouPic();
-                        Log.i("register","sem foto");
-                    }else{
-                        registerWithPic();
-                        Log.i("register","com foto");
-                    }
-
-
+                if(!isDateValid(edtNasc.getText().toString())){
+                    edtNasc.setError(getString(R.string.error_invalid_date));
+                    cancel = true;
                 }
+
+
+                AlertDialog.Builder alert = new AlertDialog.Builder(RegisterActivity.this);
+                alert.setCancelable(true)
+                        .setTitle("Deseja se cadastrar no RadarUFPA?")
+                        .setNegativeButton("Não", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if(!cancel){
+                                    showProgress(true);
+                                    if(photoFile == null){
+                                        registerWithouPic();
+                                        Log.i("register","sem foto");
+                                    }else{
+                                        registerWithPic();
+                                        Log.i("register","com foto");
+                                    }
+                                }
+                            }
+                })
+                        .create()
+                        .show();
+
     }
 
     public String getJsonError(byte bytes[]) throws JSONException {
@@ -276,7 +277,8 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
 
     private boolean isDateValid(String data){
         int ano = Integer.parseInt(data.split("/")[2]);
-        return ano<2000;
+        int anoAtual = Calendar.getInstance().get(Calendar.YEAR);
+        return (anoAtual-ano >= 16);
     }
 
     public void showDatePickerDialog(View v) {
@@ -360,7 +362,7 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_CANCELED) {
             //if (data != null) {
             if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
@@ -372,20 +374,6 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                 Log.i("URI", mcurrentPhotoUri.toString());
                 Log.i("PATH",mCurrentPhotoPath.toString());
             }
-            else
-                if (requestCode == PICK_FROM_FILE && resultCode == Activity.RESULT_OK)
-                {
-                    mcurrentPhotoUri = data.getData();
-                    mCurrentPhotoPath = new File(mcurrentPhotoUri.getPath()).getAbsolutePath();
-                    setPic();
-                    Log.i("Pick","Retornou a foto escolhida");
-                    Log.i("URI", mcurrentPhotoUri.toString());
-                    Log.i("PATH",mCurrentPhotoPath);
-                }else{}
-
-            // }else{
-            //    Log.i("foto","data eh null");
-            //}
         }else{
             Log.i("foto","resultCode eh igual a Result_canceled");
         }
@@ -466,11 +454,12 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                             //Toast.makeText(getApplicationContext(),"AuthFailureError" ,Toast.LENGTH_LONG).show();
                         } else if (error instanceof ServerError) {
                             try {
-                                //Log.i("Erro",new String(error.networkResponse.data).split("</head>")[1]);
                                 Toast.makeText(getApplicationContext(), getJsonError(error.networkResponse.data),Toast.LENGTH_LONG).show();
 
                             } catch (JSONException e) {
+                                Log.e("erro",new String(error.networkResponse.data).split("</head>")[1]);
                                 e.printStackTrace();
+                                Toast.makeText(getApplicationContext(),"Houve um erro no servidor. Tente mais tarde",Toast.LENGTH_LONG).show();
                             }
                         } else if (error instanceof NetworkError) {
                                         //Toast.makeText(myContext,"NetworkError" ,Toast.LENGTH_LONG).show();

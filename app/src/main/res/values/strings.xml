@@ -34,11 +34,14 @@
     <string name="error_invalid_email">Este email é inválido</string>
     <string name="error_invalid_password">Esta senha é muito curta, use no mínimo 6 caracteres</string>
     <string name="error_invalid_name">Esse nome é muito curto</string>
+    <string name="error_invalid_date">Essa data não é válida. Você deve ter ao menos 16 anos</string>
     <string name="error_incorrect_password">A senha está incorreta</string>
     <string name="error_field_required">Este campo é obrigatorio</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="post_marker_explanation"> Indica a quantidade de postagens realizada pela conta </string>
+    <string name="post_solved_marker_explanation"> Indica a quantidade de problemas apresentados que foram devidamente resolvidos </string>
 
     <string name="SharedPreferences">RadarUFPAPreferences</string>
     <string name="standard_answer"> A sua solicitação ainda não foi visualizada</string>

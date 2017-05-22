@@ -10,19 +10,19 @@
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_margin="10dp"
-        android:src="@drawable/icon_affected"/>
+        android:src="@drawable/icon_affected_marked"/>
 
     <ImageView
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_margin="10dp"
-        android:src="@drawable/icon_seen"/>
+        android:src="@drawable/icon_seen_marked"/>
 
     <ImageView
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_margin="10dp"
-        android:src="@drawable/icon_unknown"
+        android:src="@drawable/icon_unknown_marked"
         android:id="@+id/imageView2" />
 
 </LinearLayout>

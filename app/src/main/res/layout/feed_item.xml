@@ -124,7 +124,23 @@
                 android:id="@+id/likeBtn"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@drawable/icon_like"
+                android:src="@drawable/icon_affected"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="15dp"/>
+
+            <ImageView
+                android:id="@+id/reactSeen"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/icon_seen"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="15dp"/>
+
+            <ImageView
+                android:id="@+id/reactUnknown"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/icon_unknown"
                 android:layout_marginTop="10dp"
                 android:layout_marginLeft="15dp"/>
 

@@ -9,13 +9,13 @@ public class FeedItem {
     private int answer;
     private int typelike;
     private String name, status, image, profilePic, timeStamp, url;
-    private boolean liked;
+    private boolean reacted;
 
     public FeedItem() {
     }
 
     public FeedItem(int id, String name, String image, String status,
-                    String profilePic, String timeStamp, Boolean like) {
+                    String profilePic, String timeStamp, Boolean like, int typelike) {
         super();
         this.id = id;
         this.name = name;
@@ -23,7 +23,8 @@ public class FeedItem {
         this.status = status;
         this.profilePic = profilePic;
         this.timeStamp = timeStamp;
-        this.liked = like;
+        this.reacted = like;
+        this.typelike = typelike;
     }
 
     public int getId() {
@@ -74,12 +75,12 @@ public class FeedItem {
         this.timeStamp = timeStamp;
     }
 
-    public boolean isLiked() {
-        return liked;
+    public boolean isReacted() {
+        return reacted;
     }
 
-    public void setLiked(boolean liked) {
-        this.liked = liked;
+    public void setReacted(boolean reacted) {
+        this.reacted = reacted;
     }
 
     public int getAnswer() {

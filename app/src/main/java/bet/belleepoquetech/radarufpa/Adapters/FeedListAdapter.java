@@ -58,7 +58,9 @@ public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHo
         public TextView name;
         public NetworkImageView profilePic;
         public FeedImageView feedImageView;
-        public ImageView likeBtn;
+        public ImageView affectBtn;
+        public ImageView seenBtn;
+        public ImageView unknownBtn;
         public ImageView commentBtn;
         public CardView answerCard;
         public TextView answerText;
@@ -66,6 +68,7 @@ public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHo
         public FeedItem feedItem;
         public ImageView moreBtn;
         public SharedPreferences sp;
+        public int react;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -76,11 +79,14 @@ public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHo
             name = (TextView)itemView.findViewById(R.id.name);
             profilePic = (NetworkImageView) itemView.findViewById(R.id.profilePic);
             feedImageView = (FeedImageView) itemView.findViewById(R.id.feedImage1);
-            likeBtn = (ImageView) itemView.findViewById(R.id.likeBtn);
+            affectBtn = (ImageView) itemView.findViewById(R.id.reactAffected);
+            seenBtn = (ImageView) itemView.findViewById(R.id.reactSeen);
+            unknownBtn = (ImageView) itemView.findViewById(R.id.reactUnknown);
             commentBtn = (ImageView) itemView.findViewById(R.id.commentBtn);
             answerCard = (CardView)itemView.findViewById(R.id.cardViewAnswer);
             answerText = (TextView)itemView.findViewById(R.id.answerText);
             answerImg = (ImageView) itemView.findViewById(R.id.answerImg);
+            react =0;
             moreBtn = (ImageView) itemView.findViewById(R.id.moreBtn);
             moreBtn.setOnCreateContextMenuListener(this);
         }
@@ -126,7 +132,7 @@ public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHo
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         if (imageLoader == null)
             imageLoader = AppController.getInstance().getImageLoader();
         // - get element from your dataset at this position
@@ -201,31 +207,87 @@ public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHo
             holder.feedImageView.setVisibility(View.GONE);
         }
 
-        if(mDataset.get(position).isLiked()){
-            holder.likeBtn.setImageResource(R.drawable.icon_liked);
-            holder.likeBtn.setTag("liked");
-        }else{
-            holder.likeBtn.setImageResource(R.drawable.icon_like);
-            holder.likeBtn.setTag("notliked");
+        if(mDataset.get(position).isReacted()){
+            if(mDataset.get(position).getTypelike() == 1){
+                holder.affectBtn.setImageResource(R.drawable.icon_affected_marked);
+                holder.react=1;
+            }else if(mDataset.get(position).getTypelike() == 2){
+                holder.seenBtn.setImageResource(R.drawable.icon_seen_marked);
+                holder.react=2;
+            }else if(mDataset.get(position).getTypelike() == 3){
+                holder.unknownBtn.setImageResource(R.drawable.icon_unknown_marked);
+                holder.react=3;
+
+            }
         }
 
-        holder.likeBtn.setOnClickListener(new View.OnClickListener() {
+        holder.affectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ImageView like = (ImageView) v;
-                if(like.getTag()!= null && like.getTag().toString().equals("notliked")){
-                    Toast.makeText(ctx.getApplicationContext(),"Liked",Toast.LENGTH_LONG).show();
-                    like.setImageResource(R.drawable.icon_liked);
-                    like.setTag("liked");
-                    like(mDataset.get(position));
-                }else if(like.getTag()!= null && like.getTag().toString().equals("liked")){
-                    Toast.makeText(ctx.getApplicationContext(),"Disliked",Toast.LENGTH_LONG).show();
-                    like.setImageResource(R.drawable.icon_like);
-                    like.setTag("notliked");
-                    dislike(mDataset.get(position));
+                ImageView react = (ImageView) v;
+                if(holder.react != 1){
+                    Toast.makeText(ctx.getApplicationContext(),"Affected",Toast.LENGTH_LONG).show();
+                    react.setImageResource(R.drawable.icon_affected_marked);
+                    holder.seenBtn.setImageResource(R.drawable.icon_seen);
+                    holder.unknownBtn.setImageResource(R.drawable.icon_unknown);
+                    if(holder.react != 0){dislike(mDataset.get(position),holder.react);}
+                    like(mDataset.get(position),1);
+                    holder.react=1;
+                }else {
+                    Toast.makeText(ctx.getApplicationContext(),"Unmarked",Toast.LENGTH_LONG).show();
+                    react.setImageResource(R.drawable.icon_affected);
+                    dislike(mDataset.get(position),holder.react);
+                    holder.react = 0;
+
                 }
             }
         });
+
+
+        holder.seenBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ImageView react = (ImageView) v;
+                if(holder.react != 2){
+                    Toast.makeText(ctx.getApplicationContext(),"seen",Toast.LENGTH_LONG).show();
+                    holder.affectBtn.setImageResource(R.drawable.icon_affected);
+                    react.setImageResource(R.drawable.icon_seen_marked);
+                    holder.unknownBtn.setImageResource(R.drawable.icon_unknown);
+                    if(holder.react != 0){dislike(mDataset.get(position),holder.react);}
+                    like(mDataset.get(position),2);
+                    holder.react=2;
+                }else {
+                    Toast.makeText(ctx.getApplicationContext(),"Unmarked",Toast.LENGTH_LONG).show();
+                    react.setImageResource(R.drawable.icon_seen);
+                    dislike(mDataset.get(position),holder.react);
+                    holder.react = 0;
+
+                }
+            }
+        });
+
+        holder.unknownBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ImageView react = (ImageView) v;
+                if(holder.react != 3){
+                    Toast.makeText(ctx.getApplicationContext(),"Unknown",Toast.LENGTH_LONG).show();
+                    holder.affectBtn.setImageResource(R.drawable.icon_affected);
+                    holder.seenBtn.setImageResource(R.drawable.icon_seen);
+                    react.setImageResource(R.drawable.icon_unknown_marked);
+                    if(holder.react != 0){dislike(mDataset.get(position),holder.react);}
+                    like(mDataset.get(position),3);
+                    holder.react=3;
+                }else {
+                    Toast.makeText(ctx.getApplicationContext(),"Unmarked",Toast.LENGTH_LONG).show();
+                    react.setImageResource(R.drawable.icon_unknown);
+                    dislike(mDataset.get(position),holder.react);
+                    holder.react = 0;
+
+                }
+            }
+        });
+
 
         holder.commentBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -247,10 +309,11 @@ public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHo
         mDataset.clear();
     }
 
-    public void like(FeedItem item){
+    public void like(FeedItem item, int type){
         sp = this.ctx.getSharedPreferences(ctx.getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
         Map<String,String> params = new HashMap<>();
         params.put("post_id", String.valueOf(item.getId()));
+        params.put("type",String.valueOf(type));
         CustomJSONObjectResquest likeReq = new CustomJSONObjectResquest(Request.Method.POST,LIKE_URL+"?token="+sp.getString("token",null),params, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
@@ -285,10 +348,11 @@ public class FeedListAdapter extends RecyclerView.Adapter<FeedListAdapter.ViewHo
     }
 
 
-    public void dislike(FeedItem item){
+    public void dislike(FeedItem item, int type){
         sp = this.ctx.getSharedPreferences(ctx.getString(R.string.SharedPreferences),Context.MODE_PRIVATE);
         Map<String,String> params = new HashMap<>();
         params.put("post_id", String.valueOf(item.getId()));
+        params.put("type",String.valueOf(type));
         CustomJSONObjectResquest dislikeReq = new CustomJSONObjectResquest(Request.Method.POST,DISLIKE_URL+"?token="+sp.getString("token",null),params, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {

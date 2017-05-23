@@ -31,7 +31,7 @@
             <ImageView
                 android:layout_width="12dp"
                 android:layout_height="12dp"
-                android:src="@drawable/icon_like"
+                android:src="@drawable/icon_affected_marked"
                 android:id="@+id/imgComment"
                 android:layout_margin="5dp"
                 />
@@ -54,7 +54,7 @@
             <ImageView
                 android:layout_width="12dp"
                 android:layout_height="12dp"
-                android:src="@drawable/icon_like"
+                android:src="@drawable/icon_seen_marked"
                 android:id="@+id/react2"
                 android:layout_margin="5dp"
                 />
@@ -78,7 +78,7 @@
             <ImageView
                 android:layout_width="12dp"
                 android:layout_height="12dp"
-                android:src="@drawable/icon_like"
+                android:src="@drawable/icon_unknown_marked"
                 android:id="@+id/react3"
                 android:layout_margin="5dp"
                 />

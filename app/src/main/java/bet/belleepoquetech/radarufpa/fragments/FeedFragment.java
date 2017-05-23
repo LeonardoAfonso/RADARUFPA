@@ -7,6 +7,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.Pair;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -169,7 +170,8 @@ public class FeedFragment extends Fragment {
 
                 sp = getContext().getSharedPreferences(getString(R.string.SharedPreferences), Context.MODE_PRIVATE);
 
-                item.setLiked(hasLiked(like,sp.getString("id",null),feedObj.getInt("id")));
+                item.setReacted(hasLiked(like,sp.getString("id",null),feedObj.getInt("id")).first);
+                item.setTypelike(hasLiked(like,sp.getString("id",null),feedObj.getInt("id")).second);
 
                 item.setName(user.getString("name"));
                 item.setUser_id(user.getInt("id"));
@@ -198,20 +200,22 @@ public class FeedFragment extends Fragment {
         }
     }
 
-    private boolean hasLiked(JSONArray jsonArray, String user_id, int post_id) throws JSONException {
+    private Pair<Boolean, Integer> hasLiked(JSONArray jsonArray, String user_id, int post_id) throws JSONException {
         Boolean v = false;
+        int type =0;
         if(jsonArray.length() == 0){
             Log.i("curtida","array eh vazio");
-            return false;
+            return new Pair<>(false,0);
        }else{
            for(int i=0;i<jsonArray.length();i++){
                JSONObject json = (JSONObject) jsonArray.get(i);
-               if(String.valueOf(json.getInt("user_id")).equals(user_id) && json.getInt("post_id") == post_id ){
-                   Log.i("curtida","post:"+post_id+" tem curtida");
+               if(String.valueOf(json.getInt("user_id")).equals(user_id) && json.getInt("post_id") == post_id){
                    v = true;
+                   type = json.getInt("type");
+                   Log.i("curtida","post:"+post_id+" tem curtida do tipo "+type);
                }
            }
-           return v;
+           return new Pair<>(v,type);
        }
     }
 

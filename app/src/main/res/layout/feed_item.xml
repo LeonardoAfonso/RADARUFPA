@@ -121,7 +121,7 @@
             android:layout_width="match_parent">
 
             <ImageView
-                android:id="@+id/likeBtn"
+                android:id="@+id/reactAffected"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/icon_affected"

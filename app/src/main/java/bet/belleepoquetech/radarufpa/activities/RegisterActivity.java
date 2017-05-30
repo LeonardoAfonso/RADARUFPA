@@ -526,7 +526,7 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                 params.put("name",name);
                 params.put("email",email);
                 params.put("password",pass);
-                params.put("type",spn);
+                params.put("usertype",spn);
                 params.put("birthdate",newBirthday);
                 return params;
             }

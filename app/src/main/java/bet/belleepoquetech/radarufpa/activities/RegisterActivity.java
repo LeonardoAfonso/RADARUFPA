@@ -506,7 +506,7 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                         try {
                             Toast.makeText(getApplicationContext(), getJsonError(networkResponse.data),Toast.LENGTH_LONG).show();
                             String result = new String(networkResponse.data);
-                            Log.i("erro",result.split("</head>")[0]);
+                            Log.i("erro",result.split("</head>")[1]);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -514,7 +514,7 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                     }
                 } else {
                     String result = new String(networkResponse.data);
-                    Log.i("erro",result.split("</head>")[0]);
+                    Log.i("erro",result.split("</head>")[1]);
                 }
                 Log.i("Error", errorMessage);
                 error.printStackTrace();

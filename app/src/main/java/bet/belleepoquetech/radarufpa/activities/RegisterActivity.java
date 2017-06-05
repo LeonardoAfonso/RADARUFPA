@@ -431,7 +431,7 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
         params.put("name",name);
         params.put("email",email);
         params.put("password",pass);
-        params.put("type",spn);
+        params.put("usertype",spn);
         params.put("birthdate",newBirthday);
         CustomJSONObjectResquest req = new CustomJSONObjectResquest(
                 Request.Method.POST,
@@ -454,10 +454,12 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                             //Toast.makeText(getApplicationContext(),"AuthFailureError" ,Toast.LENGTH_LONG).show();
                         } else if (error instanceof ServerError) {
                             try {
+
                                 Toast.makeText(getApplicationContext(), getJsonError(error.networkResponse.data),Toast.LENGTH_LONG).show();
+                                Log.e("erro",new String(error.networkResponse.data));
 
                             } catch (JSONException e) {
-                                Log.e("erro",new String(error.networkResponse.data).split("</head>")[1]);
+                                Log.e("erro",new String(error.networkResponse.data).split("</head>")[0]);
                                 e.printStackTrace();
                                 Toast.makeText(getApplicationContext(),"Houve um erro no servidor. Tente mais tarde",Toast.LENGTH_LONG).show();
                             }
@@ -506,7 +508,7 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                         try {
                             Toast.makeText(getApplicationContext(), getJsonError(networkResponse.data),Toast.LENGTH_LONG).show();
                             String result = new String(networkResponse.data);
-                            Log.i("erro",result.split("</head>")[1]);
+                            Log.i("erro",result.split("</head>")[0]);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -514,7 +516,7 @@ public class RegisterActivity extends AppCompatActivity  implements DatePickerDi
                     }
                 } else {
                     String result = new String(networkResponse.data);
-                    Log.i("erro",result.split("</head>")[1]);
+                    Log.i("erro",result.split("</head>")[0]);
                 }
                 Log.i("Error", errorMessage);
                 error.printStackTrace();
